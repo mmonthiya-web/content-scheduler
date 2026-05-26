@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>内容排期工具</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+  :root {
+    --bg: #ffffff;
+    --bg-secondary: #f5f5f3;
+    --bg-tertiary: #eeece8;
+    --text: #1a1a1a;
+    --text-secondary: #6b6b6b;
+    --text-tertiary: #9a9a9a;
+    --border: rgba(0,0,0,0.12);
+    --border-secondary: rgba(0,0,0,0.2);
+    --radius-md: 8px;
+    --radius-lg: 12px;
+    --tg-blue: #2AABEE;
+    --ig-bg: #E6F1FB; --ig-text: #185FA5; --ig-border: #85B7EB;
+    --xhs-bg: #FCEBEB; --xhs-text: #A32D2D; --xhs-border: #F09595;
+    --success: #3B6D11; --warn: #BA7517; --danger: #A32D2D;
+    --scheduled: #185FA5;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1a1a; --bg-secondary: #242424; --bg-tertiary: #2e2e2e;
+      --text: #f0f0f0; --text-secondary: #a0a0a0; --text-tertiary: #6a6a6a;
+      --border: rgba(255,255,255,0.1); --border-secondary: rgba(255,255,255,0.2);
+      --ig-bg: #0c2a42; --ig-text: #7ab8f5; --ig-border: #1a4a70;
+      --xhs-bg: #3a1010; --xhs-text: #f09595; --xhs-border: #7a2020;
+    }
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg-tertiary);color:var(--text);min-height:100vh;}
+  .container{max-width:900px;margin:0 auto;padding:1.5rem 1rem;}
+  .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;}
+  .header h1{font-size:20px;font-weight:600;color:var(--text);}
+  .header-actions{display:flex;gap:8px;}
+
+  .btn-primary{background:var(--text);color:var(--bg);border:none;padding:8px 16px;border-radius:var(--radius-md);font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:inherit;}
+  .btn-outline{background:transparent;color:var(--text);border:0.5px solid var(--border-secondary);padding:7px 14px;border-radius:var(--radius-md);font-size:14px;cursor:pointer;font-family:inherit;}
+  .btn-outline:hover{background:var(--bg-secondary);}
+  .btn-sm{padding:5px 10px;font-size:12px;}
+  .btn-danger{background:transparent;color:var(--danger);border:0.5px solid var(--xhs-border);padding:7px 14px;border-radius:var(--radius-md);font-size:14px;cursor:pointer;font-family:inherit;}
+  .btn-tg{background:var(--tg-blue);color:#fff;border:none;padding:7px 14px;border-radius:var(--radius-md);font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:inherit;}
+
+  .tabs{display:flex;gap:4px;margin-bottom:1.5rem;border-bottom:0.5px solid var(--border);padding-bottom:0;}
+  .tab{padding:8px 16px;font-size:14px;cursor:pointer;border:none;background:none;color:var(--text-secondary);border-bottom:2px solid transparent;margin-bottom:-0.5px;font-family:inherit;display:inline-flex;align-items:center;gap:6px;}
+  .tab.active{color:var(--text);border-bottom:2px solid var(--text);font-weight:500;}
+  .section{display:none;}.section.active{display:block;}
+
+  /* Draft Grid */
+  .draft-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:12px;}
+  .draft-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;cursor:pointer;position:relative;transition:border-color 0.15s;}
+  .draft-card:hover{border-color:var(--border-secondary);}
+  .draft-img{width:100%;aspect-ratio:1;background:var(--bg-secondary);display:flex;align-items:center;justify-content:center;font-size:40px;overflow:hidden;}
+  .draft-img img{width:100%;height:100%;object-fit:cover;}
+  .draft-info{padding:10px 12px;}
+  .draft-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .draft-meta{font-size:11px;color:var(--text-secondary);display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+  .tag{background:var(--bg-secondary);color:var(--text-secondary);border-radius:4px;padding:1px 6px;font-size:11px;}
+  .tag.ig{background:var(--ig-bg);color:var(--ig-text);}
+  .tag.xhs{background:var(--xhs-bg);color:var(--xhs-text);}
+  .status-dot{width:6px;height:6px;border-radius:50%;display:inline-block;flex-shrink:0;}
+  .dot-draft{background:#888;}.dot-scheduled{background:var(--scheduled);}.dot-published{background:var(--success);}
+  .card-actions{position:absolute;top:6px;right:6px;display:none;gap:4px;}
+  .draft-card:hover .card-actions{display:flex;}
+  .icon-btn{width:28px;height:28px;border-radius:var(--radius-md);border:0.5px solid var(--border-secondary);background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--text-secondary);}
+  .icon-btn:hover{background:var(--bg-secondary);}
+  .icon-btn.del:hover{color:var(--danger);}
+  .add-card{border:0.5px dashed var(--border-secondary);border-radius:var(--radius-lg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;cursor:pointer;padding:2rem 1rem;color:var(--text-tertiary);background:transparent;min-height:200px;transition:background 0.15s;}
+  .add-card:hover{background:var(--bg-secondary);}
+
+  /* Modal */
+  .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:100;align-items:center;justify-content:center;padding:1rem;}
+  .modal-bg.open{display:flex;}
+  .modal{background:var(--bg);border-radius:var(--radius-lg);padding:1.5rem;width:540px;max-width:100%;max-height:90vh;overflow-y:auto;border:0.5px solid var(--border);}
+  .modal h3{font-size:16px;font-weight:600;margin-bottom:1.25rem;}
+  .field{margin-bottom:1rem;}
+  .field label{display:block;font-size:12px;color:var(--text-secondary);margin-bottom:6px;}
+  .field input,.field textarea,.field select{width:100%;border-radius:var(--radius-md);border:0.5px solid var(--border-secondary);background:var(--bg);color:var(--text);font-size:14px;padding:8px 12px;font-family:inherit;}
+  .field input:focus,.field textarea:focus{outline:none;border-color:var(--text);}
+  .field textarea{resize:vertical;min-height:90px;line-height:1.6;}
+  .img-upload-area{width:100%;aspect-ratio:2/1;border:0.5px dashed var(--border-secondary);border-radius:var(--radius-md);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;color:var(--text-secondary);font-size:13px;overflow:hidden;position:relative;}
+  .img-upload-area img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
+  .img-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;gap:6px;color:#fff;font-size:13px;opacity:0;transition:opacity 0.2s;}
+  .img-upload-area:hover .img-overlay{opacity:1;}
+  .img-placeholder{display:flex;flex-direction:column;align-items:center;gap:6px;}
+  .char-bar{height:3px;border-radius:2px;background:var(--bg-secondary);margin-top:6px;overflow:hidden;}
+  .char-fill{height:100%;border-radius:2px;transition:width 0.2s,background 0.2s;}
+  .char-info{display:flex;justify-content:space-between;margin-top:5px;}
+  .char-label{font-size:11px;color:var(--text-secondary);}
+  .char-count{font-size:11px;color:var(--text-secondary);}
+  .char-warn{color:var(--warn);}.char-over{color:var(--danger);}
+  .platform-toggles{display:flex;gap:8px;}
+  .platform-btn{padding:6px 14px;border-radius:var(--radius-md);border:0.5px solid var(--border-secondary);font-size:13px;cursor:pointer;background:transparent;color:var(--text-secondary);font-family:inherit;transition:all 0.15s;}
+  .platform-btn.active-ig{background:var(--ig-bg);color:var(--ig-text);border-color:var(--ig-border);}
+  .platform-btn.active-xhs{background:var(--xhs-bg);color:var(--xhs-text);border-color:var(--xhs-border);}
+  .reminder-box{background:var(--bg-secondary);border-radius:var(--radius-md);padding:10px 12px;display:flex;align-items:center;justify-content:space-between;margin-top:6px;}
+  .reminder-box span{font-size:13px;color:var(--text);}
+  .toggle{width:36px;height:20px;border-radius:10px;background:var(--border-secondary);cursor:pointer;position:relative;border:none;transition:background 0.2s;}
+  .toggle.on{background:var(--tg-blue);}
+  .toggle::after{content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left 0.2s;}
+  .toggle.on::after{left:19px;}
+  .modal-footer{display:flex;justify-content:space-between;align-items:center;margin-top:1.25rem;padding-top:1rem;border-top:0.5px solid var(--border);}
+  .modal-footer-right{display:flex;gap:8px;}
+
+  /* Calendar */
+  .cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
+  .cal-nav span{font-size:15px;font-weight:600;}
+  .calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:6px;}
+  .cal-header-cell{text-align:center;font-size:11px;color:var(--text-secondary);padding:4px 0;}
+  .cal-day{min-height:72px;border-radius:var(--radius-md);border:0.5px solid var(--border);padding:6px;background:var(--bg);}
+  .cal-day.today{border-color:var(--text);}
+  .cal-day.other-month{opacity:0.3;}
+  .cal-day-num{font-size:11px;color:var(--text-secondary);margin-bottom:4px;}
+  .cal-day.today .cal-day-num{font-weight:600;color:var(--text);}
+  .cal-post{font-size:10px;background:var(--ig-bg);color:var(--ig-text);border-radius:3px;padding:2px 5px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;transition:opacity 0.15s;}
+  .cal-post:hover{opacity:0.75;}
+  .cal-post.xhs{background:var(--xhs-bg);color:var(--xhs-text);}
+  .cal-post.both{background:var(--bg-secondary);color:var(--text-secondary);}
+
+  /* History */
+  .history-list{display:flex;flex-direction:column;gap:10px;}
+  .history-item{display:flex;align-items:center;gap:12px;background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:12px 14px;cursor:pointer;transition:border-color 0.15s;}
+  .history-item:hover{border-color:var(--border-secondary);}
+  .hist-img{width:48px;height:48px;border-radius:var(--radius-md);background:var(--bg-secondary);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;overflow:hidden;}
+  .hist-img img{width:100%;height:100%;object-fit:cover;}
+  .hist-info{flex:1;min-width:0;}
+  .hist-title{font-size:13px;font-weight:500;color:var(--text);}
+  .hist-meta{font-size:11px;color:var(--text-secondary);margin-top:3px;}
+  .hist-status{font-size:11px;display:flex;align-items:center;gap:4px;white-space:nowrap;flex-shrink:0;}
+  .status-published{color:var(--success);}.status-scheduled{color:var(--scheduled);}
+  .filter-bar{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;}
+  .filter-btn{padding:5px 12px;border-radius:99px;border:0.5px solid var(--border-secondary);font-size:12px;cursor:pointer;background:transparent;color:var(--text-secondary);font-family:inherit;transition:all 0.15s;}
+  .filter-btn.active{background:var(--text);color:var(--bg);border-color:transparent;}
+
+  /* Detail */
+  .detail-img-preview{width:100%;aspect-ratio:16/9;border-radius:var(--radius-md);background:var(--bg-secondary);display:flex;align-items:center;justify-content:center;font-size:56px;overflow:hidden;margin-bottom:1rem;}
+  .detail-img-preview img{width:100%;height:100%;object-fit:cover;}
+  .detail-copy{background:var(--bg-secondary);border-radius:var(--radius-md);padding:14px;font-size:13px;line-height:1.8;color:var(--text);margin-bottom:12px;white-space:pre-wrap;word-break:break-word;}
+  .detail-meta-row{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-secondary);margin-bottom:6px;}
+
+  /* TG Setup */
+  .tg-step{background:var(--bg-secondary);border-radius:var(--radius-md);padding:12px 14px;margin-bottom:1rem;font-size:13px;line-height:1.9;color:var(--text-secondary);}
+  .tg-step code{background:var(--bg);border:0.5px solid var(--border);padding:1px 6px;border-radius:4px;font-size:12px;color:var(--text);}
+  .tg-test-result{font-size:12px;margin-top:6px;min-height:18px;}
+
+  /* Toast */
+  .toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:9px 22px;border-radius:var(--radius-md);font-size:13px;z-index:999;opacity:0;transition:opacity 0.25s;pointer-events:none;white-space:nowrap;}
+  .toast.show{opacity:1;}
+
+  @media(max-width:600px){
+    .draft-grid{grid-template-columns:repeat(2,1fr);}
+    .header-actions .btn-outline span{display:none;}
+    .calendar-grid .cal-day{min-height:50px;}
+    .cal-post{display:none;}
+    .cal-day-num{font-size:12px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h1>📅 内容排期</h1>
+    <div class="header-actions">
+      <button class="btn-outline btn-sm" onclick="openTgSetup()"><i class="ti ti-brand-telegram"></i> <span>Telegram</span></button>
+      <button class="btn-primary" onclick="openModal()"><i class="ti ti-plus"></i> 新建草稿</button>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('drafts',this)"><i class="ti ti-file"></i> 草稿库</button>
+    <button class="tab" onclick="switchTab('calendar',this)"><i class="ti ti-calendar"></i> 排期日历</button>
+    <button class="tab" onclick="switchTab('history',this)"><i class="ti ti-clock"></i> 发布记录</button>
+  </div>
+
+  <div id="drafts" class="section active">
+    <div class="draft-grid" id="draft-grid"></div>
+  </div>
+
+  <div id="calendar" class="section">
+    <div class="cal-nav">
+      <button class="btn-outline btn-sm" onclick="changeMonth(-1)">← 上个月</button>
+      <span id="cal-title"></span>
+      <button class="btn-outline btn-sm" onclick="changeMonth(1)">下个月 →</button>
+    </div>
+    <div class="calendar-grid">
+      <div class="cal-header-cell">日</div><div class="cal-header-cell">一</div><div class="cal-header-cell">二</div>
+      <div class="cal-header-cell">三</div><div class="cal-header-cell">四</div><div class="cal-header-cell">五</div><div class="cal-header-cell">六</div>
+    </div>
+    <div class="calendar-grid" id="cal-body"></div>
+  </div>
+
+  <div id="history" class="section">
+    <div class="filter-bar">
+      <button class="filter-btn active" onclick="filterHistory('all',this)">全部</button>
+      <button class="filter-btn" onclick="filterHistory('published',this)">已发布</button>
+      <button class="filter-btn" onclick="filterHistory('scheduled',this)">待发布</button>
+      <button class="filter-btn" onclick="filterHistory('ig',this)">Instagram</button>
+      <button class="filter-btn" onclick="filterHistory('xhs',this)">小红书</button>
+    </div>
+    <div class="history-list" id="history-list"></div>
+  </div>
+</div>
+
+<!-- New/Edit Modal -->
+<div class="modal-bg" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <h3 id="modal-title">新建草稿</h3>
+    <div class="field">
+      <label>封面图</label>
+      <div class="img-upload-area" id="img-upload-area" onclick="document.getElementById('img-input').click()">
+        <div class="img-placeholder" id="img-placeholder"><i class="ti ti-upload" style="font-size:24px;"></i><span>点击上传图片</span></div>
+        <div class="img-overlay"><i class="ti ti-refresh"></i> 更换图片</div>
+      </div>
+      <input type="file" id="img-input" accept="image/*" style="display:none" onchange="handleImg(event)">
+    </div>
+    <div class="field"><label>标题</label><input type="text" placeholder="帖子标题..." id="new-title"></div>
+    <div class="field">
+      <label>文案</label>
+      <textarea placeholder="在这里写你的文案..." id="new-copy" oninput="updateCharCount()"></textarea>
+      <div id="char-bars"></div>
+    </div>
+    <div class="field"><label>标签</label><input type="text" placeholder="#标签1 #标签2" id="new-tags"></div>
+    <div class="field">
+      <label>发布平台</label>
+      <div class="platform-toggles">
+        <button class="platform-btn" id="btn-ig" onclick="togglePlatform('ig')">Instagram</button>
+        <button class="platform-btn" id="btn-xhs" onclick="togglePlatform('xhs')">小红书</button>
+      </div>
+    </div>
+    <div class="field">
+      <label>定时发布</label>
+      <input type="datetime-local" id="new-time" onchange="onTimeChange()">
+    </div>
+    <div id="reminder-section" style="display:none;">
+      <div class="reminder-box">
+        <span><i class="ti ti-brand-telegram" style="color:var(--tg-blue);"></i> 发布前 30 分钟 Telegram 提醒</span>
+        <button class="toggle" id="reminder-toggle" onclick="toggleReminder()"></button>
+      </div>
+      <div id="tg-warning" style="display:none;font-size:11px;color:var(--warn);margin-top:6px;padding-left:4px;"><i class="ti ti-alert-triangle"></i> 请先设置 Telegram Bot 才能收到提醒</div>
+    </div>
+    <div class="modal-footer">
+      <div id="edit-delete-btn" style="display:none;"><button class="btn-danger" onclick="deletePost()"><i class="ti ti-trash"></i> 删除</button></div>
+      <div class="modal-footer-right">
+        <button class="btn-outline" onclick="closeModal()">取消</button>
+        <button class="btn-primary" onclick="saveDraft()">保存草稿</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Detail Modal -->
+<div class="modal-bg" id="detail-modal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;">
+      <h3 id="detail-title" style="margin:0;"></h3>
+      <span id="detail-status-badge" style="font-size:11px;display:flex;align-items:center;gap:4px;"></span>
+    </div>
+    <div class="detail-img-preview" id="detail-img"></div>
+    <div class="detail-copy" id="detail-copy"></div>
+    <div id="detail-meta"></div>
+    <div class="modal-footer">
+      <button class="btn-danger btn-sm" id="detail-delete-btn" onclick="deleteFromDetail()"><i class="ti ti-trash"></i> 删除</button>
+      <div class="modal-footer-right">
+        <button class="btn-outline" onclick="document.getElementById('detail-modal').classList.remove('open')">关闭</button>
+        <button class="btn-primary" id="detail-edit-btn" onclick="editFromDetail()" style="display:none;"><i class="ti ti-edit"></i> 编辑</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Telegram Setup Modal -->
+<div class="modal-bg" id="tg-modal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal">
+    <h3><i class="ti ti-brand-telegram" style="color:var(--tg-blue);"></i> Telegram 提醒设置</h3>
+    <p style="font-size:13px;color:var(--text-secondary);margin-bottom:1rem;line-height:1.7;">设置完成后，每次帖子发布前 30 分钟会自动发送 Telegram 消息提醒。</p>
+    <div class="tg-step">
+      <strong style="color:var(--text);">三步完成设置：</strong><br>
+      1. 在 Telegram 搜索 <code>@BotFather</code>，发送 <code>/newbot</code> 创建 Bot，获得 Token<br>
+      2. 给你的 Bot 发一条消息，然后访问<br>
+      <code>api.telegram.org/bot&lt;TOKEN&gt;/getUpdates</code><br>
+      找到 <code>chat.id</code> 的数字<br>
+      3. 填入下方并点击测试
+    </div>
+    <div class="field"><label>Bot Token</label><input type="text" id="tg-token" placeholder="123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"></div>
+    <div class="field"><label>Chat ID</label><input type="text" id="tg-chatid" placeholder="123456789"></div>
+    <div class="tg-test-result" id="tg-test-result"></div>
+    <div class="modal-footer">
+      <button class="btn-outline" onclick="document.getElementById('tg-modal').classList.remove('open')">取消</button>
+      <div style="display:flex;gap:8px;">
+        <button class="btn-outline" onclick="testTelegram()"><i class="ti ti-send"></i> 发送测试</button>
+        <button class="btn-tg" onclick="saveTgSettings()"><i class="ti ti-check"></i> 保存设置</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const XHS_LIMIT = 1000, IG_LIMIT = 2200;
+
+let posts = [
+  {id:1,emoji:'🌿',imgSrc:'',title:'春日下午茶 — 新品上架',copy:'春意正浓，新品上架啦！这款新茶融合了雨前龙井与新鲜茉莉，清新又醇厚，是下午茶的最佳拍档。限时优惠进行中，手慢无！',tags:'#下午茶 #新品 #春季限定',platforms:['ig','xhs'],time:'2026-05-28T10:00',status:'scheduled',reminder:true},
+  {id:2,emoji:'✨',imgSrc:'',title:'品牌故事 Vol.3',copy:'每一个产品背后都有一段我们想和你分享的故事…',tags:'#品牌故事',platforms:['ig'],time:'',status:'draft',reminder:false},
+  {id:3,emoji:'🍰',imgSrc:'',title:'周末限定甜品',copy:'周末才有的秘密限定，每款都是手工现做，数量有限，卖完即止！',tags:'#限定 #甜品 #周末',platforms:['xhs'],time:'2026-05-31T18:00',status:'scheduled',reminder:true},
+];
+
+const historyData = [
+  {id:'h1',emoji:'🌸',imgSrc:'',title:'四月新品发布',copy:'四月限定新品正式发布！精心挑选的春季色系，每一款都值得拥有。感谢大家一直以来的支持！',tags:'#新品 #四月限定',platforms:['ig','xhs'],date:'2026-04-20T10:00',status:'published'},
+  {id:'h2',emoji:'☕',imgSrc:'',title:'咖啡系列上新',copy:'全新咖啡系列来了，浓郁香气，暖心陪伴。早上一杯，开启美好一天。',tags:'#咖啡 #新品',platforms:['ig'],date:'2026-04-28T14:00',status:'published'},
+];
+
+let nextId = 4, editingId = null, detailId = null, detailIsHistory = false;
+let selectedPlatforms = [], reminderOn = false, currentImgSrc = '';
+let currentMonth = new Date();
+let activeFilter = 'all';
+let tgToken = '', tgChatId = '';
+
+function allHistory() {
+  const sched = posts.filter(p => p.status === 'scheduled').map(p => ({...p, date: p.time, isPost: true}));
+  return [...historyData, ...sched].sort((a, b) => new Date(a.date) - new Date(b.date));
+}
+
+function switchTab(id, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+  if (id === 'calendar') renderCalendar();
+  if (id === 'history') renderHistory(activeFilter);
+}
+
+function toast(msg, dur = 2200) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur);
+}
+
+function openModal(id = null) {
+  editingId = id; currentImgSrc = ''; selectedPlatforms = []; reminderOn = false;
+  ['btn-ig','btn-xhs'].forEach(b => document.getElementById(b).className = 'platform-btn');
+  document.getElementById('reminder-toggle').className = 'toggle';
+  document.getElementById('reminder-section').style.display = 'none';
+  document.getElementById('edit-delete-btn').style.display = 'none';
+  document.getElementById('img-placeholder').style.display = 'flex';
+  const area = document.getElementById('img-upload-area');
+  area.querySelectorAll('img').forEach(i => i.remove());
+
+  if (id !== null) {
+    const p = posts.find(x => x.id === id);
+    document.getElementById('modal-title').textContent = '编辑草稿';
+    document.getElementById('new-title').value = p.title;
+    document.getElementById('new-copy').value = p.copy;
+    document.getElementById('new-tags').value = p.tags;
+    document.getElementById('new-time').value = p.time;
+    selectedPlatforms = [...p.platforms]; reminderOn = p.reminder; currentImgSrc = p.imgSrc;
+    selectedPlatforms.forEach(pl => document.getElementById('btn-' + pl).className = 'platform-btn active-' + pl);
+    if (p.reminder) document.getElementById('reminder-toggle').className = 'toggle on';
+    if (p.time) document.getElementById('reminder-section').style.display = 'block';
+    if (p.imgSrc) {
+      document.getElementById('img-placeholder').style.display = 'none';
+      const img = document.createElement('img'); img.src = p.imgSrc; area.appendChild(img);
+    }
+    document.getElementById('edit-delete-btn').style.display = 'block';
+  } else {
+    document.getElementById('modal-title').textContent = '新建草稿';
+    ['new-title','new-copy','new-tags','new-time'].forEach(fid => document.getElementById(fid).value = '');
+  }
+  updateCharCount(); updateTgWarning();
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
+
+function handleImg(e) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    currentImgSrc = ev.target.result;
+    const area = document.getElementById('img-upload-area');
+    area.querySelectorAll('img').forEach(i => i.remove());
+    const img = document.createElement('img'); img.src = currentImgSrc; area.appendChild(img);
+    document.getElementById('img-placeholder').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+function togglePlatform(p) {
+  const btn = document.getElementById('btn-' + p);
+  if (selectedPlatforms.includes(p)) { selectedPlatforms = selectedPlatforms.filter(x => x !== p); btn.className = 'platform-btn'; }
+  else { selectedPlatforms.push(p); btn.className = 'platform-btn active-' + p; }
+  updateCharCount();
+}
+
+function onTimeChange() {
+  const t = document.getElementById('new-time').value;
+  document.getElementById('reminder-section').style.display = t ? 'block' : 'none';
+  if (!t) { reminderOn = false; document.getElementById('reminder-toggle').className = 'toggle'; }
+  else if (!reminderOn) { reminderOn = true; document.getElementById('reminder-toggle').className = 'toggle on'; }
+  updateTgWarning();
+}
+
+function toggleReminder() {
+  reminderOn = !reminderOn;
+  document.getElementById('reminder-toggle').className = 'toggle' + (reminderOn ? ' on' : '');
+  updateTgWarning();
+}
+
+function updateTgWarning() {
+  const warn = document.getElementById('tg-warning');
+  if (warn) warn.style.display = (reminderOn && !tgToken) ? 'block' : 'none';
+}
+
+function updateCharCount() {
+  const len = document.getElementById('new-copy').value.length;
+  const pls = selectedPlatforms.length > 0 ? selectedPlatforms : ['xhs','ig'];
+  let html = '';
+  if (pls.includes('xhs')) {
+    const pct = Math.min(len / XHS_LIMIT, 1), over = len > XHS_LIMIT, warn = len > XHS_LIMIT * 0.9;
+    const cls = over ? 'char-over' : warn ? 'char-warn' : '';
+    html += `<div style="margin-top:8px;"><div class="char-info"><span class="char-label">小红书</span><span class="char-count ${cls}">${len} / ${XHS_LIMIT}${over ? ' ⚠️ 超出' : ''}</span></div><div class="char-bar"><div class="char-fill" style="width:${pct*100}%;background:${over?'#E24B4A':warn?'#EF9F27':'#1D9E75'};"></div></div></div>`;
+  }
+  if (pls.includes('ig')) {
+    const pct = Math.min(len / IG_LIMIT, 1), over = len > IG_LIMIT, warn = len > IG_LIMIT * 0.9;
+    const cls = over ? 'char-over' : warn ? 'char-warn' : '';
+    html += `<div style="margin-top:8px;"><div class="char-info"><span class="char-label">Instagram</span><span class="char-count ${cls}">${len} / ${IG_LIMIT}${over ? ' ⚠️ 超出' : ''}</span></div><div class="char-bar"><div class="char-fill" style="width:${pct*100}%;background:${over?'#E24B4A':warn?'#EF9F27':'#185FA5'};"></div></div></div>`;
+  }
+  document.getElementById('char-bars').innerHTML = html;
+}
+
+function saveDraft() {
+  const title = document.getElementById('new-title').value.trim() || '无标题草稿';
+  const copy = document.getElementById('new-copy').value.trim();
+  const tags = document.getElementById('new-tags').value.trim();
+  const time = document.getElementById('new-time').value;
+  if (editingId !== null) {
+    const idx = posts.findIndex(p => p.id === editingId);
+    posts[idx] = {...posts[idx], title, copy, tags, platforms:[...selectedPlatforms], time, status: time ? 'scheduled' : 'draft', reminder: reminderOn, imgSrc: currentImgSrc};
+    toast('草稿已更新 ✓');
+  } else {
+    const emojis = ['📸','🌟','💫','🎨','🖼️','🌈','🍀','🔥'];
+    posts.unshift({id: nextId++, emoji: emojis[Math.floor(Math.random() * emojis.length)], imgSrc: currentImgSrc, title, copy, tags, platforms: [...selectedPlatforms], time, status: time ? 'scheduled' : 'draft', reminder: reminderOn});
+    toast('草稿已保存 ✓');
+  }
+  if (reminderOn && time && tgToken && tgChatId) scheduleReminder(time, title);
+  renderDrafts(); closeModal();
+}
+
+function scheduleReminder(timeStr, title) {
+  const delay = new Date(timeStr).getTime() - 30 * 60 * 1000 - Date.now();
+  if (delay > 0) setTimeout(() => sendTelegram(`📢 发布提醒\n\n「${title}」将在 30 分钟后发布！\n\n记得检查内容和网络连接。`), delay);
+}
+
+async function sendTelegram(text, token, chatId) {
+  const tk = token || tgToken, ci = chatId || tgChatId;
+  if (!tk || !ci) return false;
+  try {
+    const r = await fetch(`https://api.telegram.org/bot${tk}/sendMessage`, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({chat_id: ci, text, parse_mode: 'HTML'})
+    });
+    return r.ok;
+  } catch { return false; }
+}
+
+async function testTelegram() {
+  const token = document.getElementById('tg-token').value.trim();
+  const chatId = document.getElementById('tg-chatid').value.trim();
+  const res = document.getElementById('tg-test-result');
+  if (!token || !chatId) { res.style.color = 'var(--danger)'; res.textContent = '请填写 Token 和 Chat ID'; return; }
+  res.style.color = 'var(--text-secondary)'; res.textContent = '发送中…';
+  const ok = await sendTelegram('✅ 内容排期工具连接成功！你将在帖子发布前 30 分钟收到提醒。', token, chatId);
+  if (ok) { res.style.color = 'var(--success)'; res.textContent = '✓ 发送成功！请检查你的 Telegram。'; }
+  else { res.style.color = 'var(--danger)'; res.textContent = '✗ 发送失败，请检查 Token 和 Chat ID 是否正确。'; }
+}
+
+function saveTgSettings() {
+  tgToken = document.getElementById('tg-token').value.trim();
+  tgChatId = document.getElementById('tg-chatid').value.trim();
+  document.getElementById('tg-modal').classList.remove('open');
+  toast('Telegram 设置已保存 ✓');
+  updateTgWarning();
+}
+
+function openTgSetup() {
+  document.getElementById('tg-token').value = tgToken;
+  document.getElementById('tg-chatid').value = tgChatId;
+  document.getElementById('tg-test-result').textContent = '';
+  document.getElementById('tg-modal').classList.add('open');
+}
+
+function deletePost() {
+  if (!confirm('确定要删除这篇草稿吗？')) return;
+  posts = posts.filter(p => p.id !== editingId);
+  renderDrafts(); closeModal(); toast('已删除');
+}
+
+function quickDelete(id) {
+  if (!confirm('确定删除？')) return;
+  posts = posts.filter(p => p.id !== id);
+  renderDrafts(); toast('已删除');
+}
+
+function openDetail(id, isHistory = false) {
+  detailId = id; detailIsHistory = isHistory;
+  const p = isHistory ? historyData.find(x => x.id === id) : posts.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('detail-title').textContent = p.title;
+  const badge = document.getElementById('detail-status-badge');
+  if (p.status === 'published') badge.innerHTML = `<span class="status-dot dot-published"></span><span style="color:var(--success);">已发布</span>`;
+  else if (p.status === 'scheduled') badge.innerHTML = `<span class="status-dot dot-scheduled"></span><span style="color:var(--scheduled);">待发布</span>`;
+  else badge.innerHTML = `<span class="status-dot dot-draft"></span><span style="color:#888;">草稿</span>`;
+  const imgEl = document.getElementById('detail-img');
+  imgEl.innerHTML = p.imgSrc ? `<img src="${p.imgSrc}" alt="">` : `<span style="font-size:56px;">${p.emoji}</span>`;
+  document.getElementById('detail-copy').textContent = p.copy || '（暂无文案）';
+  const dateStr = p.date || p.time;
+  document.getElementById('detail-meta').innerHTML = `
+    <div class="detail-meta-row">${p.platforms.map(pl => `<span class="tag ${pl}">${pl === 'ig' ? 'Instagram' : '小红书'}</span>`).join(' ')}</div>
+    ${p.tags ? `<div class="detail-meta-row"><i class="ti ti-hash"></i> ${p.tags}</div>` : ''}
+    ${dateStr ? `<div class="detail-meta-row"><i class="ti ti-clock"></i> ${p.status === 'published' ? '发布于' : '定时：'} ${formatTime(dateStr)}</div>` : ''}
+    ${p.reminder && p.time ? `<div class="detail-meta-row" style="color:var(--tg-blue);"><i class="ti ti-brand-telegram"></i> Telegram 提醒已开启</div>` : ''}
+  `;
+  const editBtn = document.getElementById('detail-edit-btn');
+  const delBtn = document.getElementById('detail-delete-btn');
+  if (isHistory) { editBtn.style.display = 'none'; delBtn.style.display = 'none'; }
+  else { editBtn.style.display = 'inline-flex'; delBtn.style.display = 'inline-flex'; }
+  document.getElementById('detail-modal').classList.add('open');
+}
+
+function deleteFromDetail() {
+  if (!confirm('确定删除？')) return;
+  posts = posts.filter(p => p.id !== detailId);
+  renderDrafts();
+  document.getElementById('detail-modal').classList.remove('open');
+  toast('已删除');
+}
+function editFromDetail() { document.getElementById('detail-modal').classList.remove('open'); openModal(detailId); }
+
+function formatTime(t) {
+  if (!t) return '';
+  const d = new Date(t);
+  return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+
+function renderDrafts() {
+  const grid = document.getElementById('draft-grid');
+  grid.innerHTML = posts.map(p => `
+    <div class="draft-card" onclick="openDetail(${p.id}, false)">
+      <div class="draft-img">${p.imgSrc ? `<img src="${p.imgSrc}" alt="">` : `<span>${p.emoji}</span>`}</div>
+      <div class="card-actions" onclick="event.stopPropagation()">
+        <button class="icon-btn" title="编辑" onclick="openModal(${p.id})"><i class="ti ti-edit"></i></button>
+        <button class="icon-btn del" title="删除" onclick="quickDelete(${p.id})"><i class="ti ti-trash"></i></button>
+      </div>
+      <div class="draft-info">
+        <div class="draft-title">${p.title}</div>
+        <div class="draft-meta">${p.platforms.map(pl => `<span class="tag ${pl}">${pl === 'ig' ? 'IG' : '小红书'}</span>`).join('')}</div>
+        <div class="draft-meta" style="margin-top:4px;">
+          <span class="status-dot dot-${p.status}"></span>
+          <span>${p.status === 'draft' ? '草稿' : formatTime(p.time)}</span>
+          ${p.reminder && p.time ? '<i class="ti ti-brand-telegram" style="font-size:11px;color:var(--tg-blue);"></i>' : ''}
+        </div>
+      </div>
+    </div>
+  `).join('') + `<div class="add-card" onclick="openModal()"><i class="ti ti-plus" style="font-size:28px;"></i><span style="font-size:13px;">新建草稿</span></div>`;
+}
+
+function changeMonth(d) { currentMonth.setMonth(currentMonth.getMonth() + d); renderCalendar(); }
+function renderCalendar() {
+  const y = currentMonth.getFullYear(), m = currentMonth.getMonth();
+  document.getElementById('cal-title').textContent = `${y}年${m+1}月`;
+  const first = new Date(y, m, 1).getDay(), days = new Date(y, m+1, 0).getDate(), today = new Date();
+  const scheduled = posts.filter(p => p.time && p.status === 'scheduled');
+  let html = '';
+  for (let i = 0; i < first; i++) html += '<div class="cal-day other-month"><div class="cal-day-num"></div></div>';
+  for (let d = 1; d <= days; d++) {
+    const isToday = today.getFullYear()===y && today.getMonth()===m && today.getDate()===d;
+    const dayPosts = scheduled.filter(p => { const pd = new Date(p.time); return pd.getFullYear()===y && pd.getMonth()===m && pd.getDate()===d; });
+    html += `<div class="cal-day${isToday?' today':''}"><div class="cal-day-num">${d}</div>${dayPosts.map(p => `<div class="cal-post ${p.platforms.length>1?'both':p.platforms[0]}" onclick="event.stopPropagation();openDetail(${p.id},false)">${p.emoji} ${p.title}</div>`).join('')}</div>`;
+  }
+  document.getElementById('cal-body').innerHTML = html;
+}
+
+function filterHistory(f, el) {
+  activeFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active'); renderHistory(f);
+}
+function renderHistory(f) {
+  let items = allHistory();
+  if (f === 'published') items = items.filter(h => h.status === 'published');
+  else if (f === 'scheduled') items = items.filter(h => h.status === 'scheduled');
+  else if (f === 'ig') items = items.filter(h => h.platforms.includes('ig'));
+  else if (f === 'xhs') items = items.filter(h => h.platforms.includes('xhs'));
+  document.getElementById('history-list').innerHTML = items.length === 0
+    ? '<div style="text-align:center;padding:3rem;color:var(--text-tertiary);font-size:14px;">暂无记录</div>'
+    : items.map(h => `
+    <div class="history-item" onclick="openDetail('${h.id}', ${!h.isPost})">
+      <div class="hist-img">${h.imgSrc ? `<img src="${h.imgSrc}" alt="">` : `<span>${h.emoji}</span>`}</div>
+      <div class="hist-info">
+        <div class="hist-title">${h.title}</div>
+        <div class="hist-meta">${h.platforms.map(pl => `<span class="tag ${pl}">${pl==='ig'?'Instagram':'小红书'}</span>`).join(' ')} · ${formatTime(h.date || h.time)}</div>
+      </div>
+      <div class="hist-status status-${h.status}">
+        <i class="ti ti-${h.status==='published'?'check':'clock'}"></i>
+        ${h.status === 'published' ? '已发布' : '待发布'}
+      </div>
+    </div>
+  `).join('');
+}
+
+// Init
+renderDrafts();
+currentMonth = new Date();
+</script>
+</body>
+</html>

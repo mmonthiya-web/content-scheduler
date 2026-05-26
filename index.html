@@ -2,253 +2,430 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>内容排期工具</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>内容排期</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
 <style>
+:root {
+  --bg: #FAFAF8;
+  --bg2: #F2F0EC;
+  --bg3: #E8E5DF;
+  --surface: #FFFFFF;
+  --text: #1C1B18;
+  --text2: #6B6860;
+  --text3: #A8A59E;
+  --border: #E2DFD8;
+  --border2: #C8C4BC;
+  --accent: #2D6A4F;
+  --accent-bg: #EAF3EE;
+  --accent-text: #1B4332;
+  --ig: #4F46E5;
+  --ig-bg: #EEEDFB;
+  --ig-text: #312E81;
+  --xhs: #DC2626;
+  --xhs-bg: #FEF2F2;
+  --xhs-text: #7F1D1D;
+  --warn: #D97706;
+  --warn-bg: #FFFBEB;
+  --success: #059669;
+  --success-bg: #ECFDF5;
+  --danger: #DC2626;
+  --tg: #0088CC;
+  --tg-bg: #E8F4FD;
+  --radius: 10px;
+  --radius-lg: 16px;
+  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+}
+@media (prefers-color-scheme: dark) {
   :root {
-    --bg: #ffffff;
-    --bg-secondary: #f5f5f3;
-    --bg-tertiary: #eeece8;
-    --text: #1a1a1a;
-    --text-secondary: #6b6b6b;
-    --text-tertiary: #9a9a9a;
-    --border: rgba(0,0,0,0.12);
-    --border-secondary: rgba(0,0,0,0.2);
-    --radius-md: 8px;
-    --radius-lg: 12px;
-    --tg-blue: #2AABEE;
-    --ig-bg: #E6F1FB; --ig-text: #185FA5; --ig-border: #85B7EB;
-    --xhs-bg: #FCEBEB; --xhs-text: #A32D2D; --xhs-border: #F09595;
-    --success: #3B6D11; --warn: #BA7517; --danger: #A32D2D;
-    --scheduled: #185FA5;
+    --bg: #141412; --bg2: #1E1D1A; --bg3: #272520;
+    --surface: #1E1D1A; --text: #F0EDE8; --text2: #9B9890; --text3: #5C5A55;
+    --border: #2E2C28; --border2: #3D3A35;
+    --accent: #4ADE80; --accent-bg: #0F2419; --accent-text: #86EFAC;
+    --ig-bg: #1E1B4B; --ig-text: #A5B4FC;
+    --xhs-bg: #2D1010; --xhs-text: #FCA5A5;
+    --warn-bg: #1C1208; --success-bg: #022C1A;
+    --tg-bg: #0A1F2E;
+    --shadow: 0 1px 3px rgba(0,0,0,0.3); --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
   }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #1a1a1a; --bg-secondary: #242424; --bg-tertiary: #2e2e2e;
-      --text: #f0f0f0; --text-secondary: #a0a0a0; --text-tertiary: #6a6a6a;
-      --border: rgba(255,255,255,0.1); --border-secondary: rgba(255,255,255,0.2);
-      --ig-bg: #0c2a42; --ig-text: #7ab8f5; --ig-border: #1a4a70;
-      --xhs-bg: #3a1010; --xhs-text: #f09595; --xhs-border: #7a2020;
-    }
-  }
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--bg-tertiary);color:var(--text);min-height:100vh;}
-  .container{max-width:900px;margin:0 auto;padding:1.5rem 1rem;}
-  .header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;}
-  .header h1{font-size:20px;font-weight:600;color:var(--text);}
-  .header-actions{display:flex;gap:8px;}
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { font-size: 16px; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
-  .btn-primary{background:var(--text);color:var(--bg);border:none;padding:8px 16px;border-radius:var(--radius-md);font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:inherit;}
-  .btn-outline{background:transparent;color:var(--text);border:0.5px solid var(--border-secondary);padding:7px 14px;border-radius:var(--radius-md);font-size:14px;cursor:pointer;font-family:inherit;}
-  .btn-outline:hover{background:var(--bg-secondary);}
-  .btn-sm{padding:5px 10px;font-size:12px;}
-  .btn-danger{background:transparent;color:var(--danger);border:0.5px solid var(--xhs-border);padding:7px 14px;border-radius:var(--radius-md);font-size:14px;cursor:pointer;font-family:inherit;}
-  .btn-tg{background:var(--tg-blue);color:#fff;border:none;padding:7px 14px;border-radius:var(--radius-md);font-size:14px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:inherit;}
+/* Layout */
+.app-shell { display: flex; min-height: 100vh; }
+.sidebar { width: 220px; background: var(--surface); border-right: 1px solid var(--border); padding: 1.25rem 0; display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 50; transition: transform 0.25s; }
+.sidebar-logo { padding: 0 1.25rem 1.25rem; border-bottom: 1px solid var(--border); margin-bottom: 0.5rem; }
+.sidebar-logo h1 { font-size: 16px; font-weight: 600; color: var(--text); letter-spacing: -0.3px; }
+.sidebar-logo p { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 1.25rem; font-size: 14px; color: var(--text2); cursor: pointer; border: none; background: none; width: 100%; text-align: left; font-family: inherit; transition: all 0.15s; border-radius: 0; }
+.nav-item:hover { color: var(--text); background: var(--bg2); }
+.nav-item.active { color: var(--accent-text); background: var(--accent-bg); font-weight: 500; }
+.nav-item i { font-size: 18px; }
+.nav-section { padding: 1rem 1.25rem 0.25rem; font-size: 10px; font-weight: 600; color: var(--text3); letter-spacing: 0.8px; text-transform: uppercase; }
+.sidebar-bottom { margin-top: auto; padding: 0.75rem 1.25rem; border-top: 1px solid var(--border); }
+.main { margin-left: 220px; flex: 1; display: flex; flex-direction: column; }
+.topbar { background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 1.5rem; height: 56px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 40; }
+.topbar-title { font-size: 15px; font-weight: 600; color: var(--text); }
+.topbar-actions { display: flex; gap: 8px; align-items: center; }
+.content { padding: 1.5rem; flex: 1; }
+.hamburger { display: none; background: none; border: none; color: var(--text); font-size: 22px; cursor: pointer; padding: 4px; }
+.overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 45; }
 
-  .tabs{display:flex;gap:4px;margin-bottom:1.5rem;border-bottom:0.5px solid var(--border);padding-bottom:0;}
-  .tab{padding:8px 16px;font-size:14px;cursor:pointer;border:none;background:none;color:var(--text-secondary);border-bottom:2px solid transparent;margin-bottom:-0.5px;font-family:inherit;display:inline-flex;align-items:center;gap:6px;}
-  .tab.active{color:var(--text);border-bottom:2px solid var(--text);font-weight:500;}
-  .section{display:none;}.section.active{display:block;}
+/* Buttons */
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: var(--radius); font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid transparent; font-family: inherit; transition: all 0.15s; white-space: nowrap; }
+.btn-primary { background: var(--text); color: var(--bg); }
+.btn-primary:hover { opacity: 0.85; }
+.btn-ghost { background: transparent; color: var(--text2); border-color: var(--border); }
+.btn-ghost:hover { background: var(--bg2); color: var(--text); }
+.btn-tg { background: var(--tg); color: #fff; }
+.btn-danger { background: transparent; color: var(--danger); border-color: var(--xhs-text); }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+.btn-icon { width: 32px; height: 32px; padding: 0; justify-content: center; border-radius: var(--radius); background: transparent; border: 1px solid var(--border); color: var(--text2); cursor: pointer; font-size: 16px; font-family: inherit; display: inline-flex; align-items: center; transition: all 0.15s; }
+.btn-icon:hover { background: var(--bg2); color: var(--text); }
+.btn-icon.del:hover { color: var(--danger); border-color: var(--danger); }
 
-  /* Draft Grid */
-  .draft-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:12px;}
-  .draft-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;cursor:pointer;position:relative;transition:border-color 0.15s;}
-  .draft-card:hover{border-color:var(--border-secondary);}
-  .draft-img{width:100%;aspect-ratio:1;background:var(--bg-secondary);display:flex;align-items:center;justify-content:center;font-size:40px;overflow:hidden;}
-  .draft-img img{width:100%;height:100%;object-fit:cover;}
-  .draft-info{padding:10px 12px;}
-  .draft-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .draft-meta{font-size:11px;color:var(--text-secondary);display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
-  .tag{background:var(--bg-secondary);color:var(--text-secondary);border-radius:4px;padding:1px 6px;font-size:11px;}
-  .tag.ig{background:var(--ig-bg);color:var(--ig-text);}
-  .tag.xhs{background:var(--xhs-bg);color:var(--xhs-text);}
-  .status-dot{width:6px;height:6px;border-radius:50%;display:inline-block;flex-shrink:0;}
-  .dot-draft{background:#888;}.dot-scheduled{background:var(--scheduled);}.dot-published{background:var(--success);}
-  .card-actions{position:absolute;top:6px;right:6px;display:none;gap:4px;}
-  .draft-card:hover .card-actions{display:flex;}
-  .icon-btn{width:28px;height:28px;border-radius:var(--radius-md);border:0.5px solid var(--border-secondary);background:var(--bg);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--text-secondary);}
-  .icon-btn:hover{background:var(--bg-secondary);}
-  .icon-btn.del:hover{color:var(--danger);}
-  .add-card{border:0.5px dashed var(--border-secondary);border-radius:var(--radius-lg);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;cursor:pointer;padding:2rem 1rem;color:var(--text-tertiary);background:transparent;min-height:200px;transition:background 0.15s;}
-  .add-card:hover{background:var(--bg-secondary);}
+/* Tags / Badges */
+.tag { display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 500; }
+.tag-ig { background: var(--ig-bg); color: var(--ig-text); }
+.tag-xhs { background: var(--xhs-bg); color: var(--xhs-text); }
+.tag-draft { background: var(--bg3); color: var(--text2); }
+.tag-scheduled { background: var(--tg-bg); color: var(--tg); }
+.tag-published { background: var(--success-bg); color: var(--success); }
+.dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+.dot-draft { background: var(--text3); }
+.dot-scheduled { background: var(--tg); }
+.dot-published { background: var(--success); }
 
-  /* Modal */
-  .modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:100;align-items:center;justify-content:center;padding:1rem;}
-  .modal-bg.open{display:flex;}
-  .modal{background:var(--bg);border-radius:var(--radius-lg);padding:1.5rem;width:540px;max-width:100%;max-height:90vh;overflow-y:auto;border:0.5px solid var(--border);}
-  .modal h3{font-size:16px;font-weight:600;margin-bottom:1.25rem;}
-  .field{margin-bottom:1rem;}
-  .field label{display:block;font-size:12px;color:var(--text-secondary);margin-bottom:6px;}
-  .field input,.field textarea,.field select{width:100%;border-radius:var(--radius-md);border:0.5px solid var(--border-secondary);background:var(--bg);color:var(--text);font-size:14px;padding:8px 12px;font-family:inherit;}
-  .field input:focus,.field textarea:focus{outline:none;border-color:var(--text);}
-  .field textarea{resize:vertical;min-height:90px;line-height:1.6;}
-  .img-upload-area{width:100%;aspect-ratio:2/1;border:0.5px dashed var(--border-secondary);border-radius:var(--radius-md);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;color:var(--text-secondary);font-size:13px;overflow:hidden;position:relative;}
-  .img-upload-area img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;}
-  .img-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;gap:6px;color:#fff;font-size:13px;opacity:0;transition:opacity 0.2s;}
-  .img-upload-area:hover .img-overlay{opacity:1;}
-  .img-placeholder{display:flex;flex-direction:column;align-items:center;gap:6px;}
-  .char-bar{height:3px;border-radius:2px;background:var(--bg-secondary);margin-top:6px;overflow:hidden;}
-  .char-fill{height:100%;border-radius:2px;transition:width 0.2s,background 0.2s;}
-  .char-info{display:flex;justify-content:space-between;margin-top:5px;}
-  .char-label{font-size:11px;color:var(--text-secondary);}
-  .char-count{font-size:11px;color:var(--text-secondary);}
-  .char-warn{color:var(--warn);}.char-over{color:var(--danger);}
-  .platform-toggles{display:flex;gap:8px;}
-  .platform-btn{padding:6px 14px;border-radius:var(--radius-md);border:0.5px solid var(--border-secondary);font-size:13px;cursor:pointer;background:transparent;color:var(--text-secondary);font-family:inherit;transition:all 0.15s;}
-  .platform-btn.active-ig{background:var(--ig-bg);color:var(--ig-text);border-color:var(--ig-border);}
-  .platform-btn.active-xhs{background:var(--xhs-bg);color:var(--xhs-text);border-color:var(--xhs-border);}
-  .reminder-box{background:var(--bg-secondary);border-radius:var(--radius-md);padding:10px 12px;display:flex;align-items:center;justify-content:space-between;margin-top:6px;}
-  .reminder-box span{font-size:13px;color:var(--text);}
-  .toggle{width:36px;height:20px;border-radius:10px;background:var(--border-secondary);cursor:pointer;position:relative;border:none;transition:background 0.2s;}
-  .toggle.on{background:var(--tg-blue);}
-  .toggle::after{content:'';position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:left 0.2s;}
-  .toggle.on::after{left:19px;}
-  .modal-footer{display:flex;justify-content:space-between;align-items:center;margin-top:1.25rem;padding-top:1rem;border-top:0.5px solid var(--border);}
-  .modal-footer-right{display:flex;gap:8px;}
+/* Stat Cards */
+.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-bottom: 1.25rem; }
+.stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1rem 1.1rem; }
+.stat-label { font-size: 11px; color: var(--text3); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; }
+.stat-value { font-size: 26px; font-weight: 600; color: var(--text); letter-spacing: -1px; line-height: 1; }
+.stat-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
+.stat-card.accent { background: var(--accent-bg); border-color: transparent; }
+.stat-card.accent .stat-value { color: var(--accent-text); }
 
-  /* Calendar */
-  .cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;}
-  .cal-nav span{font-size:15px;font-weight:600;}
-  .calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:6px;}
-  .cal-header-cell{text-align:center;font-size:11px;color:var(--text-secondary);padding:4px 0;}
-  .cal-day{min-height:72px;border-radius:var(--radius-md);border:0.5px solid var(--border);padding:6px;background:var(--bg);}
-  .cal-day.today{border-color:var(--text);}
-  .cal-day.other-month{opacity:0.3;}
-  .cal-day-num{font-size:11px;color:var(--text-secondary);margin-bottom:4px;}
-  .cal-day.today .cal-day-num{font-weight:600;color:var(--text);}
-  .cal-post{font-size:10px;background:var(--ig-bg);color:var(--ig-text);border-radius:3px;padding:2px 5px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;transition:opacity 0.15s;}
-  .cal-post:hover{opacity:0.75;}
-  .cal-post.xhs{background:var(--xhs-bg);color:var(--xhs-text);}
-  .cal-post.both{background:var(--bg-secondary);color:var(--text-secondary);}
+/* Filter tabs */
+.filter-tabs { display: flex; gap: 4px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+.filter-tab { padding: 5px 12px; border-radius: 99px; border: 1px solid var(--border); font-size: 12px; font-weight: 500; cursor: pointer; background: transparent; color: var(--text2); font-family: inherit; transition: all 0.15s; }
+.filter-tab:hover { background: var(--bg2); color: var(--text); }
+.filter-tab.active { background: var(--text); color: var(--bg); border-color: transparent; }
+.filter-tab.active-ig { background: var(--ig-bg); color: var(--ig-text); border-color: transparent; }
+.filter-tab.active-xhs { background: var(--xhs-bg); color: var(--xhs-text); border-color: transparent; }
 
-  /* History */
-  .history-list{display:flex;flex-direction:column;gap:10px;}
-  .history-item{display:flex;align-items:center;gap:12px;background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:12px 14px;cursor:pointer;transition:border-color 0.15s;}
-  .history-item:hover{border-color:var(--border-secondary);}
-  .hist-img{width:48px;height:48px;border-radius:var(--radius-md);background:var(--bg-secondary);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;overflow:hidden;}
-  .hist-img img{width:100%;height:100%;object-fit:cover;}
-  .hist-info{flex:1;min-width:0;}
-  .hist-title{font-size:13px;font-weight:500;color:var(--text);}
-  .hist-meta{font-size:11px;color:var(--text-secondary);margin-top:3px;}
-  .hist-status{font-size:11px;display:flex;align-items:center;gap:4px;white-space:nowrap;flex-shrink:0;}
-  .status-published{color:var(--success);}.status-scheduled{color:var(--scheduled);}
-  .filter-bar{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;}
-  .filter-btn{padding:5px 12px;border-radius:99px;border:0.5px solid var(--border-secondary);font-size:12px;cursor:pointer;background:transparent;color:var(--text-secondary);font-family:inherit;transition:all 0.15s;}
-  .filter-btn.active{background:var(--text);color:var(--bg);border-color:transparent;}
+/* Draft Grid */
+.draft-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+.draft-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; cursor: pointer; position: relative; transition: border-color 0.15s, box-shadow 0.15s; }
+.draft-card:hover { border-color: var(--border2); box-shadow: var(--shadow); }
+.draft-thumb { width: 100%; aspect-ratio: 1; background: var(--bg2); display: flex; align-items: center; justify-content: center; font-size: 44px; overflow: hidden; position: relative; }
+.draft-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.draft-thumb-acc { position: absolute; bottom: 6px; left: 6px; display: flex; gap: 3px; }
+.draft-body { padding: 10px 12px 12px; }
+.draft-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.draft-time { font-size: 11px; color: var(--text3); display: flex; align-items: center; gap: 4px; margin-top: 4px; }
+.card-actions { position: absolute; top: 7px; right: 7px; display: none; gap: 4px; }
+.draft-card:hover .card-actions { display: flex; }
+.add-card { border: 1px dashed var(--border2); border-radius: var(--radius-lg); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; cursor: pointer; padding: 2rem 1rem; color: var(--text3); background: transparent; min-height: 180px; transition: all 0.15s; }
+.add-card:hover { background: var(--bg2); color: var(--text2); border-color: var(--text3); }
 
-  /* Detail */
-  .detail-img-preview{width:100%;aspect-ratio:16/9;border-radius:var(--radius-md);background:var(--bg-secondary);display:flex;align-items:center;justify-content:center;font-size:56px;overflow:hidden;margin-bottom:1rem;}
-  .detail-img-preview img{width:100%;height:100%;object-fit:cover;}
-  .detail-copy{background:var(--bg-secondary);border-radius:var(--radius-md);padding:14px;font-size:13px;line-height:1.8;color:var(--text);margin-bottom:12px;white-space:pre-wrap;word-break:break-word;}
-  .detail-meta-row{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text-secondary);margin-bottom:6px;}
+/* Calendar */
+.cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+.cal-nav-title { font-size: 16px; font-weight: 600; color: var(--text); }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+.cal-head { text-align: center; font-size: 11px; font-weight: 600; color: var(--text3); padding: 6px 0; text-transform: uppercase; letter-spacing: 0.5px; }
+.cal-day { min-height: 80px; border-radius: var(--radius); border: 1px solid var(--border); padding: 6px; background: var(--surface); transition: border-color 0.15s; }
+.cal-day.today { border-color: var(--accent); }
+.cal-day.other { opacity: 0.3; }
+.cal-num { font-size: 11px; color: var(--text3); margin-bottom: 4px; font-weight: 500; }
+.cal-day.today .cal-num { color: var(--accent); font-weight: 700; }
+.cal-chip { font-size: 10px; border-radius: 4px; padding: 2px 5px; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; display: block; }
+.cal-chip:hover { opacity: 0.75; }
+.cal-chip.ig { background: var(--ig-bg); color: var(--ig-text); }
+.cal-chip.xhs { background: var(--xhs-bg); color: var(--xhs-text); }
+.cal-chip.both { background: var(--bg3); color: var(--text2); }
 
-  /* TG Setup */
-  .tg-step{background:var(--bg-secondary);border-radius:var(--radius-md);padding:12px 14px;margin-bottom:1rem;font-size:13px;line-height:1.9;color:var(--text-secondary);}
-  .tg-step code{background:var(--bg);border:0.5px solid var(--border);padding:1px 6px;border-radius:4px;font-size:12px;color:var(--text);}
-  .tg-test-result{font-size:12px;margin-top:6px;min-height:18px;}
+/* History */
+.history-list { display: flex; flex-direction: column; gap: 8px; }
+.hist-item { display: flex; align-items: center; gap: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 12px 14px; cursor: pointer; transition: border-color 0.15s; }
+.hist-item:hover { border-color: var(--border2); }
+.hist-thumb { width: 46px; height: 46px; border-radius: var(--radius); background: var(--bg2); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; overflow: hidden; }
+.hist-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.hist-info { flex: 1; min-width: 0; }
+.hist-title { font-size: 13px; font-weight: 500; color: var(--text); }
+.hist-meta { font-size: 11px; color: var(--text3); margin-top: 3px; display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.hist-status { font-size: 11px; font-weight: 500; display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
 
-  /* Toast */
-  .toast{position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:9px 22px;border-radius:var(--radius-md);font-size:13px;z-index:999;opacity:0;transition:opacity 0.25s;pointer-events:none;white-space:nowrap;}
-  .toast.show{opacity:1;}
+/* Accounts */
+.acc-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin-bottom: 1.5rem; }
+.acc-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1rem 1.1rem; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: border-color 0.15s; position: relative; }
+.acc-card:hover { border-color: var(--border2); }
+.acc-avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.acc-info { flex: 1; min-width: 0; }
+.acc-name { font-size: 13px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.acc-handle { font-size: 11px; color: var(--text3); }
+.acc-platform { font-size: 10px; font-weight: 600; letter-spacing: 0.3px; }
+.acc-actions { display: none; position: absolute; top: 8px; right: 8px; gap: 4px; }
+.acc-card:hover .acc-actions { display: flex; }
+.add-acc { border: 1px dashed var(--border2); cursor: pointer; transition: all 0.15s; justify-content: center; flex-direction: column; text-align: center; gap: 6px; color: var(--text3); min-height: 72px; }
+.add-acc:hover { background: var(--bg2); color: var(--text2); }
 
-  @media(max-width:600px){
-    .draft-grid{grid-template-columns:repeat(2,1fr);}
-    .header-actions .btn-outline span{display:none;}
-    .calendar-grid .cal-day{min-height:50px;}
-    .cal-post{display:none;}
-    .cal-day-num{font-size:12px;}
-  }
+/* Modal */
+.modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200; align-items: center; justify-content: center; padding: 1rem; backdrop-filter: blur(2px); }
+.modal-bg.open { display: flex; }
+.modal { background: var(--surface); border-radius: var(--radius-lg); padding: 1.5rem; width: 520px; max-width: 100%; max-height: 90vh; overflow-y: auto; box-shadow: var(--shadow-md); }
+.modal h3 { font-size: 16px; font-weight: 600; margin-bottom: 1.25rem; letter-spacing: -0.3px; }
+.field { margin-bottom: 1rem; }
+.field label { display: block; font-size: 11px; font-weight: 600; color: var(--text2); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.4px; }
+.field input, .field textarea, .field select { width: 100%; border-radius: var(--radius); border: 1px solid var(--border); background: var(--bg); color: var(--text); font-size: 14px; padding: 9px 12px; font-family: inherit; transition: border-color 0.15s; }
+.field input:focus, .field textarea:focus, .field select:focus { outline: none; border-color: var(--accent); }
+.field textarea { resize: vertical; min-height: 90px; line-height: 1.6; }
+.img-drop { width: 100%; aspect-ratio: 2/1; border: 1.5px dashed var(--border2); border-radius: var(--radius); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; cursor: pointer; color: var(--text3); font-size: 13px; overflow: hidden; position: relative; transition: all 0.15s; }
+.img-drop:hover { border-color: var(--accent); color: var(--text2); background: var(--accent-bg); }
+.img-drop img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.img-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; gap: 6px; opacity: 0; transition: opacity 0.2s; }
+.img-drop:hover .img-overlay { opacity: 1; }
+.img-placeholder { display: flex; flex-direction: column; align-items: center; gap: 6px; pointer-events: none; }
+
+/* Date time row */
+.datetime-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.time-selects { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+/* Char counter */
+.char-wrap { margin-top: 8px; }
+.char-bar-row { margin-top: 6px; }
+.char-info { display: flex; justify-content: space-between; margin-bottom: 3px; }
+.char-label { font-size: 10px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.4px; }
+.char-num { font-size: 10px; color: var(--text3); }
+.char-num.warn { color: var(--warn); }
+.char-num.over { color: var(--danger); }
+.char-track { height: 3px; background: var(--bg3); border-radius: 2px; overflow: hidden; }
+.char-fill { height: 100%; border-radius: 2px; transition: width 0.2s, background 0.2s; }
+
+/* Platform picker */
+.platform-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.platform-btn { padding: 7px 14px; border-radius: var(--radius); border: 1px solid var(--border); font-size: 13px; font-weight: 500; cursor: pointer; background: transparent; color: var(--text2); font-family: inherit; transition: all 0.15s; display: inline-flex; align-items: center; gap: 6px; }
+.platform-btn.on-ig { background: var(--ig-bg); color: var(--ig-text); border-color: var(--ig); }
+.platform-btn.on-xhs { background: var(--xhs-bg); color: var(--xhs-text); border-color: var(--xhs); }
+
+/* Account picker in modal */
+.acc-picker { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px; }
+.acc-chip { padding: 5px 10px; border-radius: 99px; border: 1px solid var(--border); font-size: 12px; cursor: pointer; background: transparent; color: var(--text2); font-family: inherit; transition: all 0.15s; }
+.acc-chip.selected { background: var(--text); color: var(--bg); border-color: transparent; }
+
+/* Reminder */
+.reminder-row { display: flex; align-items: center; justify-content: space-between; background: var(--bg2); border-radius: var(--radius); padding: 10px 12px; margin-top: 6px; }
+.reminder-label { font-size: 13px; color: var(--text); display: flex; align-items: center; gap: 8px; }
+.toggle { width: 38px; height: 22px; border-radius: 11px; background: var(--bg3); border: none; cursor: pointer; position: relative; transition: background 0.2s; flex-shrink: 0; }
+.toggle.on { background: var(--tg); }
+.toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: left 0.2s; }
+.toggle.on::after { left: 19px; }
+
+/* Modal footer */
+.modal-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+.modal-footer-right { display: flex; gap: 8px; }
+
+/* Detail modal */
+.detail-img { width: 100%; aspect-ratio: 16/9; border-radius: var(--radius); background: var(--bg2); display: flex; align-items: center; justify-content: center; font-size: 56px; overflow: hidden; margin-bottom: 1rem; }
+.detail-img img { width: 100%; height: 100%; object-fit: cover; }
+.detail-copy { background: var(--bg2); border-radius: var(--radius); padding: 12px 14px; font-size: 13px; line-height: 1.8; color: var(--text); white-space: pre-wrap; word-break: break-word; margin-bottom: 12px; }
+.detail-row { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text2); margin-bottom: 6px; }
+
+/* Toast */
+.toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 9px 20px; border-radius: var(--radius); font-size: 13px; z-index: 999; opacity: 0; transition: opacity 0.25s; pointer-events: none; white-space: nowrap; box-shadow: var(--shadow-md); }
+.toast.show { opacity: 1; }
+
+/* Empty */
+.empty { text-align: center; padding: 3rem 1rem; color: var(--text3); font-size: 14px; }
+
+/* TG step */
+.tg-step { background: var(--bg2); border-radius: var(--radius); padding: 12px 14px; margin-bottom: 1rem; font-size: 13px; line-height: 1.9; color: var(--text2); }
+.tg-step code { background: var(--bg); border: 1px solid var(--border); padding: 1px 6px; border-radius: 4px; font-size: 12px; font-family: 'DM Mono', monospace; color: var(--text); }
+
+/* Divider */
+.divider { height: 1px; background: var(--border); margin: 1rem 0; }
+
+/* Mobile */
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); }
+  .sidebar.open { transform: translateX(0); box-shadow: var(--shadow-md); }
+  .main { margin-left: 0; }
+  .hamburger { display: block; }
+  .overlay.open { display: block; }
+  .content { padding: 1rem; }
+  .draft-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .cal-day { min-height: 52px; }
+  .cal-chip { display: none; }
+  .cal-num { font-size: 13px; text-align: center; }
+  .modal { padding: 1.25rem; }
+  .datetime-row { grid-template-columns: 1fr; }
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .acc-grid { grid-template-columns: 1fr; }
+  .topbar { padding: 0 1rem; }
+}
+@media (max-width: 380px) {
+  .draft-grid { grid-template-columns: 1fr 1fr; }
+  .filter-tabs { gap: 3px; }
+  .filter-tab { padding: 4px 9px; font-size: 11px; }
+}
+
+/* Section display */
+.page { display: none; }
+.page.active { display: block; }
 </style>
 </head>
 <body>
+<div class="app-shell">
 
-<div class="container">
-  <div class="header">
-    <h1>📅 内容排期</h1>
-    <div class="header-actions">
-      <button class="btn-outline btn-sm" onclick="openTgSetup()"><i class="ti ti-brand-telegram"></i> <span>Telegram</span></button>
-      <button class="btn-primary" onclick="openModal()"><i class="ti ti-plus"></i> 新建草稿</button>
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <h1>📅 内容排期</h1>
+      <p>小红书 · Instagram</p>
     </div>
-  </div>
-
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab('drafts',this)"><i class="ti ti-file"></i> 草稿库</button>
-    <button class="tab" onclick="switchTab('calendar',this)"><i class="ti ti-calendar"></i> 排期日历</button>
-    <button class="tab" onclick="switchTab('history',this)"><i class="ti ti-clock"></i> 发布记录</button>
-  </div>
-
-  <div id="drafts" class="section active">
-    <div class="draft-grid" id="draft-grid"></div>
-  </div>
-
-  <div id="calendar" class="section">
-    <div class="cal-nav">
-      <button class="btn-outline btn-sm" onclick="changeMonth(-1)">← 上个月</button>
-      <span id="cal-title"></span>
-      <button class="btn-outline btn-sm" onclick="changeMonth(1)">下个月 →</button>
+    <button class="nav-item active" onclick="navTo('drafts',this)"><i class="ti ti-files"></i> 草稿库</button>
+    <button class="nav-item" onclick="navTo('calendar',this)"><i class="ti ti-calendar"></i> 排期日历</button>
+    <button class="nav-item" onclick="navTo('history',this)"><i class="ti ti-clock-hour-4"></i> 发布记录</button>
+    <div class="nav-section">设置</div>
+    <button class="nav-item" onclick="navTo('accounts',this)"><i class="ti ti-users"></i> 账号管理</button>
+    <button class="nav-item" onclick="openTgSetup()"><i class="ti ti-brand-telegram"></i> Telegram 提醒</button>
+    <div class="sidebar-bottom">
+      <div style="font-size:11px;color:var(--text3);">内容排期工具 v2.0</div>
     </div>
-    <div class="calendar-grid">
-      <div class="cal-header-cell">日</div><div class="cal-header-cell">一</div><div class="cal-header-cell">二</div>
-      <div class="cal-header-cell">三</div><div class="cal-header-cell">四</div><div class="cal-header-cell">五</div><div class="cal-header-cell">六</div>
-    </div>
-    <div class="calendar-grid" id="cal-body"></div>
-  </div>
+  </nav>
 
-  <div id="history" class="section">
-    <div class="filter-bar">
-      <button class="filter-btn active" onclick="filterHistory('all',this)">全部</button>
-      <button class="filter-btn" onclick="filterHistory('published',this)">已发布</button>
-      <button class="filter-btn" onclick="filterHistory('scheduled',this)">待发布</button>
-      <button class="filter-btn" onclick="filterHistory('ig',this)">Instagram</button>
-      <button class="filter-btn" onclick="filterHistory('xhs',this)">小红书</button>
+  <div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+  <!-- Main -->
+  <div class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button class="hamburger" onclick="toggleSidebar()" aria-label="菜单"><i class="ti ti-menu-2"></i></button>
+        <span class="topbar-title" id="topbar-title">草稿库</span>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-primary btn-sm" onclick="openModal()"><i class="ti ti-plus"></i> <span>新建</span></button>
+      </div>
     </div>
-    <div class="history-list" id="history-list"></div>
+
+    <div class="content">
+
+      <!-- Drafts Page -->
+      <div class="page active" id="page-drafts">
+        <div class="stat-grid" id="draft-stats"></div>
+        <div class="filter-tabs" id="draft-filters">
+          <button class="filter-tab active" onclick="setDraftFilter('all',this)">全部</button>
+          <button class="filter-tab" onclick="setDraftFilter('draft',this)">草稿</button>
+          <button class="filter-tab" onclick="setDraftFilter('scheduled',this)">已排期</button>
+          <button class="filter-tab" onclick="setDraftFilter('ig',this)">Instagram</button>
+          <button class="filter-tab" onclick="setDraftFilter('xhs',this)">小红书</button>
+        </div>
+        <div class="draft-grid" id="draft-grid"></div>
+      </div>
+
+      <!-- Calendar Page -->
+      <div class="page" id="page-calendar">
+        <div class="stat-grid" id="cal-stats"></div>
+        <div class="cal-nav">
+          <button class="btn btn-ghost btn-sm" onclick="changeMonth(-1)"><i class="ti ti-chevron-left"></i></button>
+          <span class="cal-nav-title" id="cal-title"></span>
+          <button class="btn btn-ghost btn-sm" onclick="changeMonth(1)"><i class="ti ti-chevron-right"></i></button>
+        </div>
+        <div class="cal-grid">
+          <div class="cal-head">日</div><div class="cal-head">一</div><div class="cal-head">二</div>
+          <div class="cal-head">三</div><div class="cal-head">四</div><div class="cal-head">五</div><div class="cal-head">六</div>
+        </div>
+        <div class="cal-grid" id="cal-body" style="margin-top:3px;"></div>
+      </div>
+
+      <!-- History Page -->
+      <div class="page" id="page-history">
+        <div class="filter-tabs">
+          <button class="filter-tab active" onclick="setHistFilter('all',this)">全部</button>
+          <button class="filter-tab" onclick="setHistFilter('published',this)">已发布</button>
+          <button class="filter-tab" onclick="setHistFilter('scheduled',this)">待发布</button>
+          <button class="filter-tab" onclick="setHistFilter('ig',this)">Instagram</button>
+          <button class="filter-tab" onclick="setHistFilter('xhs',this)">小红书</button>
+        </div>
+        <div class="history-list" id="history-list"></div>
+      </div>
+
+      <!-- Accounts Page -->
+      <div class="page" id="page-accounts">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+          <div>
+            <div style="font-size:15px;font-weight:600;color:var(--text);margin-bottom:2px;">账号管理</div>
+            <div style="font-size:12px;color:var(--text3);">在不同账号之间切换发布内容</div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="openAccModal()"><i class="ti ti-plus"></i> 添加账号</button>
+        </div>
+        <div class="acc-grid" id="acc-grid"></div>
+      </div>
+
+    </div>
   </div>
 </div>
 
-<!-- New/Edit Modal -->
+<!-- Post Modal -->
 <div class="modal-bg" id="modal" onclick="if(event.target===this)closeModal()">
   <div class="modal">
-    <h3 id="modal-title">新建草稿</h3>
+    <h3 id="modal-h">新建草稿</h3>
     <div class="field">
       <label>封面图</label>
-      <div class="img-upload-area" id="img-upload-area" onclick="document.getElementById('img-input').click()">
-        <div class="img-placeholder" id="img-placeholder"><i class="ti ti-upload" style="font-size:24px;"></i><span>点击上传图片</span></div>
-        <div class="img-overlay"><i class="ti ti-refresh"></i> 更换图片</div>
+      <div class="img-drop" id="img-drop" onclick="document.getElementById('img-input').click()">
+        <div class="img-placeholder" id="img-ph"><i class="ti ti-photo-up" style="font-size:28px;"></i><span>点击上传图片</span></div>
+        <div class="img-overlay"><i class="ti ti-refresh"></i> 更换</div>
       </div>
       <input type="file" id="img-input" accept="image/*" style="display:none" onchange="handleImg(event)">
     </div>
-    <div class="field"><label>标题</label><input type="text" placeholder="帖子标题..." id="new-title"></div>
+    <div class="field"><label>标题</label><input type="text" id="new-title" placeholder="帖子标题…"></div>
     <div class="field">
       <label>文案</label>
-      <textarea placeholder="在这里写你的文案..." id="new-copy" oninput="updateCharCount()"></textarea>
-      <div id="char-bars"></div>
+      <textarea id="new-copy" placeholder="写下你的文案…" oninput="updateChars()"></textarea>
+      <div class="char-wrap" id="char-wrap"></div>
     </div>
-    <div class="field"><label>标签</label><input type="text" placeholder="#标签1 #标签2" id="new-tags"></div>
+    <div class="field"><label>标签</label><input type="text" id="new-tags" placeholder="#标签1 #标签2"></div>
     <div class="field">
       <label>发布平台</label>
-      <div class="platform-toggles">
-        <button class="platform-btn" id="btn-ig" onclick="togglePlatform('ig')">Instagram</button>
-        <button class="platform-btn" id="btn-xhs" onclick="togglePlatform('xhs')">小红书</button>
+      <div class="platform-row">
+        <button class="platform-btn" id="pbtn-ig" onclick="togglePlatform('ig')"><i class="ti ti-brand-instagram"></i> Instagram</button>
+        <button class="platform-btn" id="pbtn-xhs" onclick="togglePlatform('xhs')"><i class="ti ti-letter-x"></i> 小红书</button>
       </div>
+    </div>
+    <div class="field" id="acc-field" style="display:none;">
+      <label>选择账号</label>
+      <div class="acc-picker" id="acc-picker"></div>
     </div>
     <div class="field">
       <label>定时发布</label>
-      <input type="datetime-local" id="new-time" onchange="onTimeChange()">
-    </div>
-    <div id="reminder-section" style="display:none;">
-      <div class="reminder-box">
-        <span><i class="ti ti-brand-telegram" style="color:var(--tg-blue);"></i> 发布前 30 分钟 Telegram 提醒</span>
-        <button class="toggle" id="reminder-toggle" onclick="toggleReminder()"></button>
+      <div class="datetime-row">
+        <input type="date" id="new-date" onchange="onDateChange()">
+        <div class="time-selects">
+          <select id="new-hour" onchange="onTimeChange()">
+            <option value="">时</option>
+          </select>
+          <select id="new-min" onchange="onTimeChange()">
+            <option value="">分</option>
+          </select>
+        </div>
       </div>
-      <div id="tg-warning" style="display:none;font-size:11px;color:var(--warn);margin-top:6px;padding-left:4px;"><i class="ti ti-alert-triangle"></i> 请先设置 Telegram Bot 才能收到提醒</div>
+    </div>
+    <div id="reminder-wrap" style="display:none;">
+      <div class="reminder-row">
+        <span class="reminder-label"><i class="ti ti-brand-telegram" style="color:var(--tg);font-size:17px;"></i> 发布前 30 分钟 Telegram 提醒</span>
+        <button class="toggle" id="rtoggle" onclick="toggleReminder()"></button>
+      </div>
+      <div id="tg-warn" style="display:none;font-size:11px;color:var(--warn);margin-top:5px;padding-left:4px;"><i class="ti ti-alert-triangle"></i> 请先设置 Telegram Bot</div>
     </div>
     <div class="modal-footer">
-      <div id="edit-delete-btn" style="display:none;"><button class="btn-danger" onclick="deletePost()"><i class="ti ti-trash"></i> 删除</button></div>
+      <div id="del-btn" style="display:none;"><button class="btn btn-danger btn-sm" onclick="deletePost()"><i class="ti ti-trash"></i> 删除</button></div>
       <div class="modal-footer-right">
-        <button class="btn-outline" onclick="closeModal()">取消</button>
-        <button class="btn-primary" onclick="saveDraft()">保存草稿</button>
+        <button class="btn btn-ghost" onclick="closeModal()">取消</button>
+        <button class="btn btn-primary" onclick="saveDraft()">保存草稿</button>
       </div>
     </div>
   </div>
@@ -257,44 +434,65 @@
 <!-- Detail Modal -->
 <div class="modal-bg" id="detail-modal" onclick="if(event.target===this)this.classList.remove('open')">
   <div class="modal">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem;">
-      <h3 id="detail-title" style="margin:0;"></h3>
-      <span id="detail-status-badge" style="font-size:11px;display:flex;align-items:center;gap:4px;"></span>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1.25rem;gap:8px;">
+      <h3 id="dm-title" style="margin:0;flex:1;"></h3>
+      <span id="dm-badge"></span>
     </div>
-    <div class="detail-img-preview" id="detail-img"></div>
-    <div class="detail-copy" id="detail-copy"></div>
-    <div id="detail-meta"></div>
+    <div class="detail-img" id="dm-img"></div>
+    <div class="detail-copy" id="dm-copy"></div>
+    <div id="dm-meta"></div>
     <div class="modal-footer">
-      <button class="btn-danger btn-sm" id="detail-delete-btn" onclick="deleteFromDetail()"><i class="ti ti-trash"></i> 删除</button>
+      <button class="btn btn-danger btn-sm" id="dm-del" onclick="deleteFromDetail()"><i class="ti ti-trash"></i> 删除</button>
       <div class="modal-footer-right">
-        <button class="btn-outline" onclick="document.getElementById('detail-modal').classList.remove('open')">关闭</button>
-        <button class="btn-primary" id="detail-edit-btn" onclick="editFromDetail()" style="display:none;"><i class="ti ti-edit"></i> 编辑</button>
+        <button class="btn btn-ghost" onclick="document.getElementById('detail-modal').classList.remove('open')">关闭</button>
+        <button class="btn btn-primary" id="dm-edit" onclick="editFromDetail()" style="display:none;"><i class="ti ti-edit"></i> 编辑</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Telegram Setup Modal -->
-<div class="modal-bg" id="tg-modal" onclick="if(event.target===this)this.classList.remove('open')">
-  <div class="modal">
-    <h3><i class="ti ti-brand-telegram" style="color:var(--tg-blue);"></i> Telegram 提醒设置</h3>
-    <p style="font-size:13px;color:var(--text-secondary);margin-bottom:1rem;line-height:1.7;">设置完成后，每次帖子发布前 30 分钟会自动发送 Telegram 消息提醒。</p>
-    <div class="tg-step">
-      <strong style="color:var(--text);">三步完成设置：</strong><br>
-      1. 在 Telegram 搜索 <code>@BotFather</code>，发送 <code>/newbot</code> 创建 Bot，获得 Token<br>
-      2. 给你的 Bot 发一条消息，然后访问<br>
-      <code>api.telegram.org/bot&lt;TOKEN&gt;/getUpdates</code><br>
-      找到 <code>chat.id</code> 的数字<br>
-      3. 填入下方并点击测试
+<!-- Account Modal -->
+<div class="modal-bg" id="acc-modal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal" style="max-width:420px;">
+    <h3 id="acc-modal-h">添加账号</h3>
+    <div class="field">
+      <label>平台</label>
+      <select id="acc-platform">
+        <option value="ig">Instagram</option>
+        <option value="xhs">小红书</option>
+      </select>
     </div>
-    <div class="field"><label>Bot Token</label><input type="text" id="tg-token" placeholder="123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11"></div>
-    <div class="field"><label>Chat ID</label><input type="text" id="tg-chatid" placeholder="123456789"></div>
-    <div class="tg-test-result" id="tg-test-result"></div>
+    <div class="field"><label>账号名称</label><input type="text" id="acc-name" placeholder="eg. 品牌官方号"></div>
+    <div class="field"><label>用户名 / Handle</label><input type="text" id="acc-handle" placeholder="@username"></div>
     <div class="modal-footer">
-      <button class="btn-outline" onclick="document.getElementById('tg-modal').classList.remove('open')">取消</button>
-      <div style="display:flex;gap:8px;">
-        <button class="btn-outline" onclick="testTelegram()"><i class="ti ti-send"></i> 发送测试</button>
-        <button class="btn-tg" onclick="saveTgSettings()"><i class="ti ti-check"></i> 保存设置</button>
+      <div id="acc-del-btn" style="display:none;"><button class="btn btn-danger btn-sm" onclick="deleteAcc()"><i class="ti ti-trash"></i> 删除</button></div>
+      <div class="modal-footer-right">
+        <button class="btn btn-ghost" onclick="document.getElementById('acc-modal').classList.remove('open')">取消</button>
+        <button class="btn btn-primary" onclick="saveAcc()">保存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Telegram Modal -->
+<div class="modal-bg" id="tg-modal" onclick="if(event.target===this)this.classList.remove('open')">
+  <div class="modal" style="max-width:460px;">
+    <h3><i class="ti ti-brand-telegram" style="color:var(--tg);"></i> Telegram 提醒设置</h3>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:1rem;line-height:1.7;">设置后，帖子发布前 30 分钟会自动发 Telegram 消息提醒你。</p>
+    <div class="tg-step">
+      <strong style="color:var(--text);">三步完成：</strong><br>
+      1. Telegram 搜索 <code>@BotFather</code>，发 <code>/newbot</code> 创建 Bot，获得 Token<br>
+      2. 给 Bot 发一条消息，访问 <code>api.telegram.org/bot&lt;TOKEN&gt;/getUpdates</code> 找 <code>chat.id</code><br>
+      3. 填入下方，点测试
+    </div>
+    <div class="field"><label>Bot Token</label><input type="text" id="tg-token" placeholder="123456:ABC-DEF…"></div>
+    <div class="field"><label>Chat ID</label><input type="text" id="tg-chatid" placeholder="123456789"></div>
+    <div id="tg-result" style="font-size:12px;min-height:16px;margin-top:4px;"></div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="document.getElementById('tg-modal').classList.remove('open')">取消</button>
+      <div class="modal-footer-right">
+        <button class="btn btn-ghost" onclick="testTg()"><i class="ti ti-send"></i> 测试</button>
+        <button class="btn btn-tg" onclick="saveTg()"><i class="ti ti-check"></i> 保存</button>
       </div>
     </div>
   </div>
@@ -303,319 +501,540 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const XHS_LIMIT = 1000, IG_LIMIT = 2200;
-
+const XHS_MAX = 1000, IG_MAX = 2200;
 let posts = [
-  {id:1,emoji:'🌿',imgSrc:'',title:'春日下午茶 — 新品上架',copy:'春意正浓，新品上架啦！这款新茶融合了雨前龙井与新鲜茉莉，清新又醇厚，是下午茶的最佳拍档。限时优惠进行中，手慢无！',tags:'#下午茶 #新品 #春季限定',platforms:['ig','xhs'],time:'2026-05-28T10:00',status:'scheduled',reminder:true},
-  {id:2,emoji:'✨',imgSrc:'',title:'品牌故事 Vol.3',copy:'每一个产品背后都有一段我们想和你分享的故事…',tags:'#品牌故事',platforms:['ig'],time:'',status:'draft',reminder:false},
-  {id:3,emoji:'🍰',imgSrc:'',title:'周末限定甜品',copy:'周末才有的秘密限定，每款都是手工现做，数量有限，卖完即止！',tags:'#限定 #甜品 #周末',platforms:['xhs'],time:'2026-05-31T18:00',status:'scheduled',reminder:true},
+  {id:1,emoji:'🌿',imgSrc:'',title:'春日下午茶 — 新品上架',copy:'春意正浓，新品上架啦！这款新茶融合了雨前龙井与新鲜茉莉，清新又醇厚。限时优惠进行中！',tags:'#下午茶 #新品 #春季限定',platforms:['ig','xhs'],accounts:[],time:'2026-05-28T10:00',status:'scheduled',reminder:true},
+  {id:2,emoji:'✨',imgSrc:'',title:'品牌故事 Vol.3',copy:'每一个产品背后都有一段我们想和你分享的故事…',tags:'#品牌故事',platforms:['ig'],accounts:[],time:'',status:'draft',reminder:false},
+  {id:3,emoji:'🍰',imgSrc:'',title:'周末限定甜品',copy:'周末才有的秘密限定，每款手工现做，数量有限，卖完即止！',tags:'#限定 #甜品',platforms:['xhs'],accounts:[],time:'2026-05-31T18:00',status:'scheduled',reminder:true},
 ];
-
 const historyData = [
-  {id:'h1',emoji:'🌸',imgSrc:'',title:'四月新品发布',copy:'四月限定新品正式发布！精心挑选的春季色系，每一款都值得拥有。感谢大家一直以来的支持！',tags:'#新品 #四月限定',platforms:['ig','xhs'],date:'2026-04-20T10:00',status:'published'},
-  {id:'h2',emoji:'☕',imgSrc:'',title:'咖啡系列上新',copy:'全新咖啡系列来了，浓郁香气，暖心陪伴。早上一杯，开启美好一天。',tags:'#咖啡 #新品',platforms:['ig'],date:'2026-04-28T14:00',status:'published'},
+  {id:'h1',emoji:'🌸',imgSrc:'',title:'四月新品发布',copy:'四月限定新品正式发布！精心挑选的春季色系，感谢大家支持！',tags:'#新品 #四月',platforms:['ig','xhs'],accounts:[],date:'2026-04-20T10:00',status:'published'},
+  {id:'h2',emoji:'☕',imgSrc:'',title:'咖啡系列上新',copy:'全新咖啡系列来了，浓郁香气，暖心陪伴。',tags:'#咖啡',platforms:['ig'],accounts:[],date:'2026-04-28T14:00',status:'published'},
 ];
+let accounts = [
+  {id:'a1',platform:'ig',name:'品牌主账号',handle:'@brand_official'},
+  {id:'a2',platform:'ig',name:'生活副号',handle:'@brand_lifestyle'},
+  {id:'a3',platform:'xhs',name:'小红书官方',handle:'@品牌官方'},
+];
+let nextId=4, nextAccId=4;
+let editingId=null, detailId=null, detailIsHistory=false, editingAccId=null;
+let selPlatforms=[], selAccounts=[], reminderOn=false, curImgSrc='';
+let curMonth=new Date();
+let draftFilter='all', histFilter='all';
+let tgToken='', tgChatId='';
+const pageNames = {drafts:'草稿库',calendar:'排期日历',history:'发布记录',accounts:'账号管理'};
 
-let nextId = 4, editingId = null, detailId = null, detailIsHistory = false;
-let selectedPlatforms = [], reminderOn = false, currentImgSrc = '';
-let currentMonth = new Date();
-let activeFilter = 'all';
-let tgToken = '', tgChatId = '';
-
-function allHistory() {
-  const sched = posts.filter(p => p.status === 'scheduled').map(p => ({...p, date: p.time, isPost: true}));
-  return [...historyData, ...sched].sort((a, b) => new Date(a.date) - new Date(b.date));
-}
-
-function switchTab(id, el) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+function navTo(page, el) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
   el.classList.add('active');
-  if (id === 'calendar') renderCalendar();
-  if (id === 'history') renderHistory(activeFilter);
+  document.getElementById('topbar-title').textContent = pageNames[page];
+  closeSidebar();
+  if(page==='calendar') renderCalendar();
+  if(page==='history') renderHistory();
+  if(page==='accounts') renderAccounts();
+  if(page==='drafts') renderDrafts();
 }
 
-function toast(msg, dur = 2200) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), dur);
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('open');
+}
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
 }
 
-function openModal(id = null) {
-  editingId = id; currentImgSrc = ''; selectedPlatforms = []; reminderOn = false;
-  ['btn-ig','btn-xhs'].forEach(b => document.getElementById(b).className = 'platform-btn');
-  document.getElementById('reminder-toggle').className = 'toggle';
-  document.getElementById('reminder-section').style.display = 'none';
-  document.getElementById('edit-delete-btn').style.display = 'none';
-  document.getElementById('img-placeholder').style.display = 'flex';
-  const area = document.getElementById('img-upload-area');
-  area.querySelectorAll('img').forEach(i => i.remove());
-
-  if (id !== null) {
-    const p = posts.find(x => x.id === id);
-    document.getElementById('modal-title').textContent = '编辑草稿';
-    document.getElementById('new-title').value = p.title;
-    document.getElementById('new-copy').value = p.copy;
-    document.getElementById('new-tags').value = p.tags;
-    document.getElementById('new-time').value = p.time;
-    selectedPlatforms = [...p.platforms]; reminderOn = p.reminder; currentImgSrc = p.imgSrc;
-    selectedPlatforms.forEach(pl => document.getElementById('btn-' + pl).className = 'platform-btn active-' + pl);
-    if (p.reminder) document.getElementById('reminder-toggle').className = 'toggle on';
-    if (p.time) document.getElementById('reminder-section').style.display = 'block';
-    if (p.imgSrc) {
-      document.getElementById('img-placeholder').style.display = 'none';
-      const img = document.createElement('img'); img.src = p.imgSrc; area.appendChild(img);
-    }
-    document.getElementById('edit-delete-btn').style.display = 'block';
-  } else {
-    document.getElementById('modal-title').textContent = '新建草稿';
-    ['new-title','new-copy','new-tags','new-time'].forEach(fid => document.getElementById(fid).value = '');
-  }
-  updateCharCount(); updateTgWarning();
-  document.getElementById('modal').classList.add('open');
-}
-function closeModal() { document.getElementById('modal').classList.remove('open'); }
-
-function handleImg(e) {
-  const file = e.target.files[0]; if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    currentImgSrc = ev.target.result;
-    const area = document.getElementById('img-upload-area');
-    area.querySelectorAll('img').forEach(i => i.remove());
-    const img = document.createElement('img'); img.src = currentImgSrc; area.appendChild(img);
-    document.getElementById('img-placeholder').style.display = 'none';
-  };
-  reader.readAsDataURL(file);
+function toast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
 }
 
-function togglePlatform(p) {
-  const btn = document.getElementById('btn-' + p);
-  if (selectedPlatforms.includes(p)) { selectedPlatforms = selectedPlatforms.filter(x => x !== p); btn.className = 'platform-btn'; }
-  else { selectedPlatforms.push(p); btn.className = 'platform-btn active-' + p; }
-  updateCharCount();
-}
-
-function onTimeChange() {
-  const t = document.getElementById('new-time').value;
-  document.getElementById('reminder-section').style.display = t ? 'block' : 'none';
-  if (!t) { reminderOn = false; document.getElementById('reminder-toggle').className = 'toggle'; }
-  else if (!reminderOn) { reminderOn = true; document.getElementById('reminder-toggle').className = 'toggle on'; }
-  updateTgWarning();
-}
-
-function toggleReminder() {
-  reminderOn = !reminderOn;
-  document.getElementById('reminder-toggle').className = 'toggle' + (reminderOn ? ' on' : '');
-  updateTgWarning();
-}
-
-function updateTgWarning() {
-  const warn = document.getElementById('tg-warning');
-  if (warn) warn.style.display = (reminderOn && !tgToken) ? 'block' : 'none';
-}
-
-function updateCharCount() {
-  const len = document.getElementById('new-copy').value.length;
-  const pls = selectedPlatforms.length > 0 ? selectedPlatforms : ['xhs','ig'];
-  let html = '';
-  if (pls.includes('xhs')) {
-    const pct = Math.min(len / XHS_LIMIT, 1), over = len > XHS_LIMIT, warn = len > XHS_LIMIT * 0.9;
-    const cls = over ? 'char-over' : warn ? 'char-warn' : '';
-    html += `<div style="margin-top:8px;"><div class="char-info"><span class="char-label">小红书</span><span class="char-count ${cls}">${len} / ${XHS_LIMIT}${over ? ' ⚠️ 超出' : ''}</span></div><div class="char-bar"><div class="char-fill" style="width:${pct*100}%;background:${over?'#E24B4A':warn?'#EF9F27':'#1D9E75'};"></div></div></div>`;
-  }
-  if (pls.includes('ig')) {
-    const pct = Math.min(len / IG_LIMIT, 1), over = len > IG_LIMIT, warn = len > IG_LIMIT * 0.9;
-    const cls = over ? 'char-over' : warn ? 'char-warn' : '';
-    html += `<div style="margin-top:8px;"><div class="char-info"><span class="char-label">Instagram</span><span class="char-count ${cls}">${len} / ${IG_LIMIT}${over ? ' ⚠️ 超出' : ''}</span></div><div class="char-bar"><div class="char-fill" style="width:${pct*100}%;background:${over?'#E24B4A':warn?'#EF9F27':'#185FA5'};"></div></div></div>`;
-  }
-  document.getElementById('char-bars').innerHTML = html;
-}
-
-function saveDraft() {
-  const title = document.getElementById('new-title').value.trim() || '无标题草稿';
-  const copy = document.getElementById('new-copy').value.trim();
-  const tags = document.getElementById('new-tags').value.trim();
-  const time = document.getElementById('new-time').value;
-  if (editingId !== null) {
-    const idx = posts.findIndex(p => p.id === editingId);
-    posts[idx] = {...posts[idx], title, copy, tags, platforms:[...selectedPlatforms], time, status: time ? 'scheduled' : 'draft', reminder: reminderOn, imgSrc: currentImgSrc};
-    toast('草稿已更新 ✓');
-  } else {
-    const emojis = ['📸','🌟','💫','🎨','🖼️','🌈','🍀','🔥'];
-    posts.unshift({id: nextId++, emoji: emojis[Math.floor(Math.random() * emojis.length)], imgSrc: currentImgSrc, title, copy, tags, platforms: [...selectedPlatforms], time, status: time ? 'scheduled' : 'draft', reminder: reminderOn});
-    toast('草稿已保存 ✓');
-  }
-  if (reminderOn && time && tgToken && tgChatId) scheduleReminder(time, title);
-  renderDrafts(); closeModal();
-}
-
-function scheduleReminder(timeStr, title) {
-  const delay = new Date(timeStr).getTime() - 30 * 60 * 1000 - Date.now();
-  if (delay > 0) setTimeout(() => sendTelegram(`📢 发布提醒\n\n「${title}」将在 30 分钟后发布！\n\n记得检查内容和网络连接。`), delay);
-}
-
-async function sendTelegram(text, token, chatId) {
-  const tk = token || tgToken, ci = chatId || tgChatId;
-  if (!tk || !ci) return false;
-  try {
-    const r = await fetch(`https://api.telegram.org/bot${tk}/sendMessage`, {
-      method: 'POST', headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({chat_id: ci, text, parse_mode: 'HTML'})
-    });
-    return r.ok;
-  } catch { return false; }
-}
-
-async function testTelegram() {
-  const token = document.getElementById('tg-token').value.trim();
-  const chatId = document.getElementById('tg-chatid').value.trim();
-  const res = document.getElementById('tg-test-result');
-  if (!token || !chatId) { res.style.color = 'var(--danger)'; res.textContent = '请填写 Token 和 Chat ID'; return; }
-  res.style.color = 'var(--text-secondary)'; res.textContent = '发送中…';
-  const ok = await sendTelegram('✅ 内容排期工具连接成功！你将在帖子发布前 30 分钟收到提醒。', token, chatId);
-  if (ok) { res.style.color = 'var(--success)'; res.textContent = '✓ 发送成功！请检查你的 Telegram。'; }
-  else { res.style.color = 'var(--danger)'; res.textContent = '✗ 发送失败，请检查 Token 和 Chat ID 是否正确。'; }
-}
-
-function saveTgSettings() {
-  tgToken = document.getElementById('tg-token').value.trim();
-  tgChatId = document.getElementById('tg-chatid').value.trim();
-  document.getElementById('tg-modal').classList.remove('open');
-  toast('Telegram 设置已保存 ✓');
-  updateTgWarning();
-}
-
-function openTgSetup() {
-  document.getElementById('tg-token').value = tgToken;
-  document.getElementById('tg-chatid').value = tgChatId;
-  document.getElementById('tg-test-result').textContent = '';
-  document.getElementById('tg-modal').classList.add('open');
-}
-
-function deletePost() {
-  if (!confirm('确定要删除这篇草稿吗？')) return;
-  posts = posts.filter(p => p.id !== editingId);
-  renderDrafts(); closeModal(); toast('已删除');
-}
-
-function quickDelete(id) {
-  if (!confirm('确定删除？')) return;
-  posts = posts.filter(p => p.id !== id);
-  renderDrafts(); toast('已删除');
-}
-
-function openDetail(id, isHistory = false) {
-  detailId = id; detailIsHistory = isHistory;
-  const p = isHistory ? historyData.find(x => x.id === id) : posts.find(x => x.id === id);
-  if (!p) return;
-  document.getElementById('detail-title').textContent = p.title;
-  const badge = document.getElementById('detail-status-badge');
-  if (p.status === 'published') badge.innerHTML = `<span class="status-dot dot-published"></span><span style="color:var(--success);">已发布</span>`;
-  else if (p.status === 'scheduled') badge.innerHTML = `<span class="status-dot dot-scheduled"></span><span style="color:var(--scheduled);">待发布</span>`;
-  else badge.innerHTML = `<span class="status-dot dot-draft"></span><span style="color:#888;">草稿</span>`;
-  const imgEl = document.getElementById('detail-img');
-  imgEl.innerHTML = p.imgSrc ? `<img src="${p.imgSrc}" alt="">` : `<span style="font-size:56px;">${p.emoji}</span>`;
-  document.getElementById('detail-copy').textContent = p.copy || '（暂无文案）';
-  const dateStr = p.date || p.time;
-  document.getElementById('detail-meta').innerHTML = `
-    <div class="detail-meta-row">${p.platforms.map(pl => `<span class="tag ${pl}">${pl === 'ig' ? 'Instagram' : '小红书'}</span>`).join(' ')}</div>
-    ${p.tags ? `<div class="detail-meta-row"><i class="ti ti-hash"></i> ${p.tags}</div>` : ''}
-    ${dateStr ? `<div class="detail-meta-row"><i class="ti ti-clock"></i> ${p.status === 'published' ? '发布于' : '定时：'} ${formatTime(dateStr)}</div>` : ''}
-    ${p.reminder && p.time ? `<div class="detail-meta-row" style="color:var(--tg-blue);"><i class="ti ti-brand-telegram"></i> Telegram 提醒已开启</div>` : ''}
-  `;
-  const editBtn = document.getElementById('detail-edit-btn');
-  const delBtn = document.getElementById('detail-delete-btn');
-  if (isHistory) { editBtn.style.display = 'none'; delBtn.style.display = 'none'; }
-  else { editBtn.style.display = 'inline-flex'; delBtn.style.display = 'inline-flex'; }
-  document.getElementById('detail-modal').classList.add('open');
-}
-
-function deleteFromDetail() {
-  if (!confirm('确定删除？')) return;
-  posts = posts.filter(p => p.id !== detailId);
-  renderDrafts();
-  document.getElementById('detail-modal').classList.remove('open');
-  toast('已删除');
-}
-function editFromDetail() { document.getElementById('detail-modal').classList.remove('open'); openModal(detailId); }
-
-function formatTime(t) {
-  if (!t) return '';
-  const d = new Date(t);
+function fmtTime(t) {
+  if(!t) return '';
+  const d=new Date(t);
   return `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 }
 
+function getPostTime(p) {
+  if(!p.time) return '';
+  const d=p.time.split('T');
+  return d[0]+'T'+(d[1]||'00:00');
+}
+
+function allHistory() {
+  const sched=posts.filter(p=>p.status==='scheduled').map(p=>({...p,date:p.time,isPost:true}));
+  return [...historyData,...sched].sort((a,b)=>new Date(a.date)-new Date(b.date));
+}
+
+/* ---- DRAFT STATS ---- */
+function renderDraftStats() {
+  const total=posts.length;
+  const unscheduled=posts.filter(p=>p.status==='draft').length;
+  const igCount=posts.filter(p=>p.platforms.includes('ig')).length;
+  const xhsCount=posts.filter(p=>p.platforms.includes('xhs')).length;
+  document.getElementById('draft-stats').innerHTML=`
+    <div class="stat-card accent">
+      <div class="stat-label">草稿总数</div>
+      <div class="stat-value">${total}</div>
+      <div class="stat-sub">${posts.filter(p=>p.status==='scheduled').length} 已排期</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">未发布草稿</div>
+      <div class="stat-value">${unscheduled}</div>
+      <div class="stat-sub">待排期</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label"><i class="ti ti-brand-instagram" style="font-size:12px;"></i> Instagram</div>
+      <div class="stat-value">${igCount}</div>
+      <div class="stat-sub">篇内容</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">小红书</div>
+      <div class="stat-value">${xhsCount}</div>
+      <div class="stat-sub">篇内容</div>
+    </div>
+  `;
+}
+
+/* ---- DRAFTS ---- */
+function setDraftFilter(f, el) {
+  draftFilter=f;
+  document.querySelectorAll('#draft-filters .filter-tab').forEach(b=>b.classList.remove('active','active-ig','active-xhs'));
+  const cls = f==='ig'?'active-ig':f==='xhs'?'active-xhs':'active';
+  el.classList.add(cls);
+  renderDrafts();
+}
+
 function renderDrafts() {
-  const grid = document.getElementById('draft-grid');
-  grid.innerHTML = posts.map(p => `
-    <div class="draft-card" onclick="openDetail(${p.id}, false)">
-      <div class="draft-img">${p.imgSrc ? `<img src="${p.imgSrc}" alt="">` : `<span>${p.emoji}</span>`}</div>
-      <div class="card-actions" onclick="event.stopPropagation()">
-        <button class="icon-btn" title="编辑" onclick="openModal(${p.id})"><i class="ti ti-edit"></i></button>
-        <button class="icon-btn del" title="删除" onclick="quickDelete(${p.id})"><i class="ti ti-trash"></i></button>
+  renderDraftStats();
+  let filtered=posts;
+  if(draftFilter==='draft') filtered=posts.filter(p=>p.status==='draft');
+  else if(draftFilter==='scheduled') filtered=posts.filter(p=>p.status==='scheduled');
+  else if(draftFilter==='ig') filtered=posts.filter(p=>p.platforms.includes('ig'));
+  else if(draftFilter==='xhs') filtered=posts.filter(p=>p.platforms.includes('xhs'));
+
+  const grid=document.getElementById('draft-grid');
+  grid.innerHTML=filtered.map(p=>`
+    <div class="draft-card" onclick="openDetail(${p.id},false)">
+      <div class="draft-thumb">
+        ${p.imgSrc?`<img src="${p.imgSrc}" alt="">`:`<span>${p.emoji}</span>`}
+        <div class="draft-thumb-acc">
+          ${p.platforms.includes('ig')?`<span class="tag tag-ig" style="font-size:9px;padding:1px 5px;">IG</span>`:''}
+          ${p.platforms.includes('xhs')?`<span class="tag tag-xhs" style="font-size:9px;padding:1px 5px;">XHS</span>`:''}
+        </div>
       </div>
-      <div class="draft-info">
+      <div class="card-actions" onclick="event.stopPropagation()">
+        <button class="btn-icon" onclick="openModal(${p.id})" title="编辑"><i class="ti ti-edit"></i></button>
+        <button class="btn-icon del" onclick="quickDel(${p.id})" title="删除"><i class="ti ti-trash"></i></button>
+      </div>
+      <div class="draft-body">
         <div class="draft-title">${p.title}</div>
-        <div class="draft-meta">${p.platforms.map(pl => `<span class="tag ${pl}">${pl === 'ig' ? 'IG' : '小红书'}</span>`).join('')}</div>
-        <div class="draft-meta" style="margin-top:4px;">
-          <span class="status-dot dot-${p.status}"></span>
-          <span>${p.status === 'draft' ? '草稿' : formatTime(p.time)}</span>
-          ${p.reminder && p.time ? '<i class="ti ti-brand-telegram" style="font-size:11px;color:var(--tg-blue);"></i>' : ''}
+        <div class="draft-time">
+          <span class="dot dot-${p.status}"></span>
+          <span>${p.status==='draft'?'草稿':fmtTime(p.time)}</span>
+          ${p.reminder&&p.time?`<i class="ti ti-brand-telegram" style="font-size:11px;color:var(--tg);margin-left:2px;"></i>`:''}
         </div>
       </div>
     </div>
-  `).join('') + `<div class="add-card" onclick="openModal()"><i class="ti ti-plus" style="font-size:28px;"></i><span style="font-size:13px;">新建草稿</span></div>`;
+  `).join('')+`
+    <div class="add-card" onclick="openModal()">
+      <i class="ti ti-plus" style="font-size:28px;"></i>
+      <span style="font-size:13px;">新建草稿</span>
+    </div>`;
 }
 
-function changeMonth(d) { currentMonth.setMonth(currentMonth.getMonth() + d); renderCalendar(); }
+/* ---- CALENDAR ---- */
+function changeMonth(d) { curMonth.setMonth(curMonth.getMonth()+d); renderCalendar(); }
+
 function renderCalendar() {
-  const y = currentMonth.getFullYear(), m = currentMonth.getMonth();
-  document.getElementById('cal-title').textContent = `${y}年${m+1}月`;
-  const first = new Date(y, m, 1).getDay(), days = new Date(y, m+1, 0).getDate(), today = new Date();
-  const scheduled = posts.filter(p => p.time && p.status === 'scheduled');
-  let html = '';
-  for (let i = 0; i < first; i++) html += '<div class="cal-day other-month"><div class="cal-day-num"></div></div>';
-  for (let d = 1; d <= days; d++) {
-    const isToday = today.getFullYear()===y && today.getMonth()===m && today.getDate()===d;
-    const dayPosts = scheduled.filter(p => { const pd = new Date(p.time); return pd.getFullYear()===y && pd.getMonth()===m && pd.getDate()===d; });
-    html += `<div class="cal-day${isToday?' today':''}"><div class="cal-day-num">${d}</div>${dayPosts.map(p => `<div class="cal-post ${p.platforms.length>1?'both':p.platforms[0]}" onclick="event.stopPropagation();openDetail(${p.id},false)">${p.emoji} ${p.title}</div>`).join('')}</div>`;
+  const y=curMonth.getFullYear(), m=curMonth.getMonth();
+  document.getElementById('cal-title').textContent=`${y}年${m+1}月`;
+  const today=new Date();
+  const thisMonthPosts=posts.filter(p=>{
+    if(!p.time) return false;
+    const pd=new Date(p.time);
+    return pd.getFullYear()===y && pd.getMonth()===m;
+  });
+  const published=historyData.filter(h=>{
+    const pd=new Date(h.date);
+    return pd.getFullYear()===y && pd.getMonth()===m;
+  }).length;
+  const pending=thisMonthPosts.filter(p=>p.status==='scheduled').length;
+  document.getElementById('cal-stats').innerHTML=`
+    <div class="stat-card">
+      <div class="stat-label">本月已发布</div>
+      <div class="stat-value">${published}</div>
+      <div class="stat-sub">篇</div>
+    </div>
+    <div class="stat-card accent">
+      <div class="stat-label">本月待发布</div>
+      <div class="stat-value">${pending}</div>
+      <div class="stat-sub">篇已排期</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">本月总计</div>
+      <div class="stat-value">${published+pending}</div>
+      <div class="stat-sub">篇内容</div>
+    </div>
+  `;
+  const first=new Date(y,m,1).getDay();
+  const days=new Date(y,m+1,0).getDate();
+  const scheduled=posts.filter(p=>p.time&&p.status==='scheduled');
+  let html='';
+  for(let i=0;i<first;i++) html+='<div class="cal-day other"><div class="cal-num"></div></div>';
+  for(let d=1;d<=days;d++){
+    const isToday=today.getFullYear()===y&&today.getMonth()===m&&today.getDate()===d;
+    const dayPosts=scheduled.filter(p=>{const pd=new Date(p.time);return pd.getFullYear()===y&&pd.getMonth()===m&&pd.getDate()===d;});
+    html+=`<div class="cal-day${isToday?' today':''}"><div class="cal-num">${d}</div>${dayPosts.map(p=>`<div class="cal-chip ${p.platforms.length>1?'both':p.platforms[0]}" onclick="openDetail(${p.id},false)">${p.emoji} ${p.title}</div>`).join('')}</div>`;
   }
-  document.getElementById('cal-body').innerHTML = html;
+  document.getElementById('cal-body').innerHTML=html;
 }
 
-function filterHistory(f, el) {
-  activeFilter = f;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  el.classList.add('active'); renderHistory(f);
+/* ---- HISTORY ---- */
+function setHistFilter(f,el){
+  histFilter=f;
+  document.querySelectorAll('#page-history .filter-tab').forEach(b=>b.classList.remove('active','active-ig','active-xhs'));
+  const cls=f==='ig'?'active-ig':f==='xhs'?'active-xhs':'active';
+  el.classList.add(cls);
+  renderHistory();
 }
-function renderHistory(f) {
-  let items = allHistory();
-  if (f === 'published') items = items.filter(h => h.status === 'published');
-  else if (f === 'scheduled') items = items.filter(h => h.status === 'scheduled');
-  else if (f === 'ig') items = items.filter(h => h.platforms.includes('ig'));
-  else if (f === 'xhs') items = items.filter(h => h.platforms.includes('xhs'));
-  document.getElementById('history-list').innerHTML = items.length === 0
-    ? '<div style="text-align:center;padding:3rem;color:var(--text-tertiary);font-size:14px;">暂无记录</div>'
-    : items.map(h => `
-    <div class="history-item" onclick="openDetail('${h.id}', ${!h.isPost})">
-      <div class="hist-img">${h.imgSrc ? `<img src="${h.imgSrc}" alt="">` : `<span>${h.emoji}</span>`}</div>
+
+function renderHistory(){
+  let items=allHistory();
+  if(histFilter==='published') items=items.filter(h=>h.status==='published');
+  else if(histFilter==='scheduled') items=items.filter(h=>h.status==='scheduled');
+  else if(histFilter==='ig') items=items.filter(h=>h.platforms.includes('ig'));
+  else if(histFilter==='xhs') items=items.filter(h=>h.platforms.includes('xhs'));
+  const list=document.getElementById('history-list');
+  if(!items.length){list.innerHTML='<div class="empty">暂无记录</div>';return;}
+  list.innerHTML=items.map(h=>`
+    <div class="hist-item" onclick="openDetail('${h.id}',${!h.isPost})">
+      <div class="hist-thumb">${h.imgSrc?`<img src="${h.imgSrc}" alt="">`:`${h.emoji}`}</div>
       <div class="hist-info">
         <div class="hist-title">${h.title}</div>
-        <div class="hist-meta">${h.platforms.map(pl => `<span class="tag ${pl}">${pl==='ig'?'Instagram':'小红书'}</span>`).join(' ')} · ${formatTime(h.date || h.time)}</div>
+        <div class="hist-meta">
+          ${h.platforms.map(pl=>`<span class="tag ${pl==='ig'?'tag-ig':'tag-xhs'}">${pl==='ig'?'Instagram':'小红书'}</span>`).join('')}
+          <span>${fmtTime(h.date||h.time)}</span>
+        </div>
       </div>
-      <div class="hist-status status-${h.status}">
-        <i class="ti ti-${h.status==='published'?'check':'clock'}"></i>
-        ${h.status === 'published' ? '已发布' : '待发布'}
+      <div class="hist-status ${h.status==='published'?'':''}">
+        <span class="tag ${h.status==='published'?'tag-published':'tag-scheduled'}">
+          <i class="ti ti-${h.status==='published'?'check':'clock'}" style="font-size:10px;"></i>
+          ${h.status==='published'?'已发布':'待发布'}
+        </span>
       </div>
     </div>
   `).join('');
 }
 
-// Init
+/* ---- ACCOUNTS ---- */
+function renderAccounts(){
+  const grid=document.getElementById('acc-grid');
+  const igEmoji={ig:'📸',xhs:'📕'};
+  const igColor={ig:'var(--ig-bg)',xhs:'var(--xhs-bg)'};
+  const igTextColor={ig:'var(--ig-text)',xhs:'var(--xhs-text)'};
+  grid.innerHTML=accounts.map(a=>`
+    <div class="acc-card" onclick="openAccModal('${a.id}')">
+      <div class="acc-avatar" style="background:${igColor[a.platform]};font-size:20px;">${igEmoji[a.platform]}</div>
+      <div class="acc-info">
+        <div class="acc-name">${a.name}</div>
+        <div class="acc-handle">${a.handle}</div>
+        <div class="acc-platform" style="color:${igTextColor[a.platform]};margin-top:3px;">${a.platform==='ig'?'Instagram':'小红书'}</div>
+      </div>
+      <div class="acc-actions" onclick="event.stopPropagation()">
+        <button class="btn-icon del" onclick="openAccModal('${a.id}')"><i class="ti ti-edit"></i></button>
+      </div>
+    </div>
+  `).join('')+`
+    <div class="acc-card add-acc" onclick="openAccModal()">
+      <i class="ti ti-plus" style="font-size:24px;"></i>
+      <span style="font-size:13px;">添加账号</span>
+    </div>`;
+}
+
+function openAccModal(id=null){
+  editingAccId=id;
+  if(id){
+    const a=accounts.find(x=>x.id===id);
+    document.getElementById('acc-modal-h').textContent='编辑账号';
+    document.getElementById('acc-platform').value=a.platform;
+    document.getElementById('acc-name').value=a.name;
+    document.getElementById('acc-handle').value=a.handle;
+    document.getElementById('acc-del-btn').style.display='block';
+  } else {
+    document.getElementById('acc-modal-h').textContent='添加账号';
+    document.getElementById('acc-platform').value='ig';
+    document.getElementById('acc-name').value='';
+    document.getElementById('acc-handle').value='';
+    document.getElementById('acc-del-btn').style.display='none';
+  }
+  document.getElementById('acc-modal').classList.add('open');
+}
+
+function saveAcc(){
+  const platform=document.getElementById('acc-platform').value;
+  const name=document.getElementById('acc-name').value.trim()||'未命名账号';
+  const handle=document.getElementById('acc-handle').value.trim();
+  if(editingAccId){
+    const idx=accounts.findIndex(a=>a.id===editingAccId);
+    accounts[idx]={...accounts[idx],platform,name,handle};
+    toast('账号已更新 ✓');
+  } else {
+    accounts.push({id:'a'+(nextAccId++),platform,name,handle});
+    toast('账号已添加 ✓');
+  }
+  document.getElementById('acc-modal').classList.remove('open');
+  renderAccounts();
+}
+
+function deleteAcc(){
+  if(!confirm('确定删除此账号？'))return;
+  accounts=accounts.filter(a=>a.id!==editingAccId);
+  document.getElementById('acc-modal').classList.remove('open');
+  renderAccounts();
+  toast('已删除');
+}
+
+/* ---- MODAL ---- */
+function initHourMin(){
+  const h=document.getElementById('new-hour');
+  const mi=document.getElementById('new-min');
+  if(h.children.length>1)return;
+  for(let i=0;i<24;i++){const o=document.createElement('option');o.value=String(i).padStart(2,'0');o.textContent=String(i).padStart(2,'0')+'时';h.appendChild(o);}
+  for(let i=0;i<60;i+=5){const o=document.createElement('option');o.value=String(i).padStart(2,'0');o.textContent=String(i).padStart(2,'0')+'分';mi.appendChild(o);}
+}
+
+function openModal(id=null){
+  initHourMin();
+  editingId=id; curImgSrc=''; selPlatforms=[]; selAccounts=[]; reminderOn=false;
+  document.getElementById('pbtn-ig').className='platform-btn';
+  document.getElementById('pbtn-xhs').className='platform-btn';
+  document.getElementById('rtoggle').className='toggle';
+  document.getElementById('reminder-wrap').style.display='none';
+  document.getElementById('del-btn').style.display='none';
+  document.getElementById('img-ph').style.display='flex';
+  const drop=document.getElementById('img-drop');
+  drop.querySelectorAll('img').forEach(i=>i.remove());
+
+  if(id!==null){
+    const p=posts.find(x=>x.id===id);
+    document.getElementById('modal-h').textContent='编辑草稿';
+    document.getElementById('new-title').value=p.title;
+    document.getElementById('new-copy').value=p.copy;
+    document.getElementById('new-tags').value=p.tags;
+    selPlatforms=[...p.platforms]; selAccounts=[...(p.accounts||[])]; reminderOn=p.reminder; curImgSrc=p.imgSrc;
+    selPlatforms.forEach(pl=>{document.getElementById('pbtn-'+pl).className='platform-btn on-'+pl;});
+    if(p.reminder) document.getElementById('rtoggle').className='toggle on';
+    if(p.time){
+      const parts=p.time.split('T');
+      document.getElementById('new-date').value=parts[0]||'';
+      const tp=(parts[1]||'00:00').split(':');
+      document.getElementById('new-hour').value=tp[0]||'';
+      document.getElementById('new-min').value=tp[1]||'00';
+      document.getElementById('reminder-wrap').style.display='block';
+    } else {
+      document.getElementById('new-date').value='';
+      document.getElementById('new-hour').value='';
+      document.getElementById('new-min').value='';
+    }
+    if(p.imgSrc){document.getElementById('img-ph').style.display='none';const img=document.createElement('img');img.src=p.imgSrc;drop.appendChild(img);}
+    document.getElementById('del-btn').style.display='block';
+  } else {
+    document.getElementById('modal-h').textContent='新建草稿';
+    ['new-title','new-copy','new-tags'].forEach(fid=>document.getElementById(fid).value='');
+    document.getElementById('new-date').value='';
+    document.getElementById('new-hour').value='';
+    document.getElementById('new-min').value='';
+  }
+  updateChars(); updateAccPicker(); updateTgWarn();
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal(){ document.getElementById('modal').classList.remove('open'); }
+
+function handleImg(e){
+  const file=e.target.files[0]; if(!file)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    curImgSrc=ev.target.result;
+    const drop=document.getElementById('img-drop');
+    drop.querySelectorAll('img').forEach(i=>i.remove());
+    const img=document.createElement('img');img.src=curImgSrc;drop.appendChild(img);
+    document.getElementById('img-ph').style.display='none';
+  };r.readAsDataURL(file);
+}
+
+function togglePlatform(p){
+  const btn=document.getElementById('pbtn-'+p);
+  if(selPlatforms.includes(p)){selPlatforms=selPlatforms.filter(x=>x!==p);btn.className='platform-btn';}
+  else{selPlatforms.push(p);btn.className='platform-btn on-'+p;}
+  updateChars(); updateAccPicker();
+}
+
+function updateAccPicker(){
+  const field=document.getElementById('acc-field');
+  const picker=document.getElementById('acc-picker');
+  const relevant=accounts.filter(a=>selPlatforms.includes(a.platform));
+  if(!relevant.length){field.style.display='none';return;}
+  field.style.display='block';
+  picker.innerHTML=relevant.map(a=>`
+    <button class="acc-chip${selAccounts.includes(a.id)?' selected':''}" onclick="toggleAcc('${a.id}')">${a.name}</button>
+  `).join('');
+}
+
+function toggleAcc(id){
+  if(selAccounts.includes(id)) selAccounts=selAccounts.filter(x=>x!==id);
+  else selAccounts.push(id);
+  updateAccPicker();
+}
+
+function onDateChange(){ updateReminderVis(); }
+function onTimeChange(){ updateReminderVis(); }
+function updateReminderVis(){
+  const d=document.getElementById('new-date').value;
+  const h=document.getElementById('new-hour').value;
+  document.getElementById('reminder-wrap').style.display=(d&&h)?'block':'none';
+  if(!d||!h){reminderOn=false;document.getElementById('rtoggle').className='toggle';}
+  else if(!reminderOn){reminderOn=true;document.getElementById('rtoggle').className='toggle on';}
+  updateTgWarn();
+}
+
+function toggleReminder(){
+  reminderOn=!reminderOn;
+  document.getElementById('rtoggle').className='toggle'+(reminderOn?' on':'');
+  updateTgWarn();
+}
+function updateTgWarn(){
+  const w=document.getElementById('tg-warn');
+  if(w) w.style.display=(reminderOn&&!tgToken)?'block':'none';
+}
+
+function buildTime(){
+  const d=document.getElementById('new-date').value;
+  const h=document.getElementById('new-hour').value;
+  const m=document.getElementById('new-min').value||'00';
+  return (d&&h)?`${d}T${h}:${m}`:'';
+}
+
+function updateChars(){
+  const len=document.getElementById('new-copy').value.length;
+  const pls=selPlatforms.length?selPlatforms:['xhs','ig'];
+  let html='';
+  if(pls.includes('xhs')){
+    const pct=Math.min(len/XHS_MAX,1),over=len>XHS_MAX,warn=len>XHS_MAX*0.9;
+    html+=`<div class="char-bar-row"><div class="char-info"><span class="char-label">小红书</span><span class="char-num${over?' over':warn?' warn':''}">${len}/${XHS_MAX}${over?' ⚠️':''}</span></div><div class="char-track"><div class="char-fill" style="width:${pct*100}%;background:${over?'var(--danger)':warn?'var(--warn)':'var(--success)'}"></div></div></div>`;
+  }
+  if(pls.includes('ig')){
+    const pct=Math.min(len/IG_MAX,1),over=len>IG_MAX,warn=len>IG_MAX*0.9;
+    html+=`<div class="char-bar-row" style="margin-top:6px;"><div class="char-info"><span class="char-label">Instagram</span><span class="char-num${over?' over':warn?' warn':''}">${len}/${IG_MAX}${over?' ⚠️':''}</span></div><div class="char-track"><div class="char-fill" style="width:${pct*100}%;background:${over?'var(--danger)':warn?'var(--warn)':'var(--ig)'}"></div></div></div>`;
+  }
+  document.getElementById('char-wrap').innerHTML=html;
+}
+
+function saveDraft(){
+  const title=document.getElementById('new-title').value.trim()||'无标题草稿';
+  const copy=document.getElementById('new-copy').value.trim();
+  const tags=document.getElementById('new-tags').value.trim();
+  const time=buildTime();
+  if(editingId!==null){
+    const idx=posts.findIndex(p=>p.id===editingId);
+    posts[idx]={...posts[idx],title,copy,tags,platforms:[...selPlatforms],accounts:[...selAccounts],time,status:time?'scheduled':'draft',reminder:reminderOn,imgSrc:curImgSrc};
+    toast('草稿已更新 ✓');
+  } else {
+    const emojis=['📸','🌟','💫','🎨','🖼️','🌈','🍀','🔥','✨','🎯'];
+    posts.unshift({id:nextId++,emoji:emojis[Math.floor(Math.random()*emojis.length)],imgSrc:curImgSrc,title,copy,tags,platforms:[...selPlatforms],accounts:[...selAccounts],time,status:time?'scheduled':'draft',reminder:reminderOn});
+    toast('草稿已保存 ✓');
+  }
+  if(reminderOn&&time&&tgToken&&tgChatId) scheduleReminder(time,title);
+  renderDrafts(); closeModal();
+}
+
+function deletePost(){
+  if(!confirm('确定删除？'))return;
+  posts=posts.filter(p=>p.id!==editingId);
+  renderDrafts(); closeModal(); toast('已删除');
+}
+function quickDel(id){
+  if(!confirm('确定删除？'))return;
+  posts=posts.filter(p=>p.id!==id);
+  renderDrafts(); toast('已删除');
+}
+
+/* ---- DETAIL ---- */
+function openDetail(id,isHistory=false){
+  detailId=id; detailIsHistory=isHistory;
+  const p=isHistory?historyData.find(x=>x.id===id):posts.find(x=>x.id===id);
+  if(!p)return;
+  document.getElementById('dm-title').textContent=p.title;
+  const statusMap={published:'<span class="tag tag-published"><i class="ti ti-check" style="font-size:10px;"></i> 已发布</span>',scheduled:'<span class="tag tag-scheduled"><i class="ti ti-clock" style="font-size:10px;"></i> 待发布</span>',draft:'<span class="tag tag-draft">草稿</span>'};
+  document.getElementById('dm-badge').innerHTML=statusMap[p.status]||'';
+  const imgEl=document.getElementById('dm-img');
+  imgEl.innerHTML=p.imgSrc?`<img src="${p.imgSrc}" alt="">`:`<span style="font-size:56px;">${p.emoji}</span>`;
+  document.getElementById('dm-copy').textContent=p.copy||'（暂无文案）';
+  const dateStr=p.date||p.time;
+  const accInfo=(p.accounts&&p.accounts.length)?p.accounts.map(id=>{const a=accounts.find(x=>x.id===id);return a?a.name:'';}).filter(Boolean).join('、'):'';
+  document.getElementById('dm-meta').innerHTML=`
+    <div class="detail-row">${p.platforms.map(pl=>`<span class="tag ${pl==='ig'?'tag-ig':'tag-xhs'}">${pl==='ig'?'Instagram':'小红书'}</span>`).join('')}</div>
+    ${p.tags?`<div class="detail-row"><i class="ti ti-hash" style="font-size:14px;"></i> ${p.tags}</div>`:''}
+    ${accInfo?`<div class="detail-row"><i class="ti ti-user" style="font-size:14px;"></i> ${accInfo}</div>`:''}
+    ${dateStr?`<div class="detail-row"><i class="ti ti-clock" style="font-size:14px;"></i> ${p.status==='published'?'发布于':'定时：'} ${fmtTime(dateStr)}</div>`:''}
+    ${p.reminder&&p.time?`<div class="detail-row" style="color:var(--tg);"><i class="ti ti-brand-telegram" style="font-size:14px;"></i> Telegram 提醒已开启</div>`:''}
+  `;
+  const editBtn=document.getElementById('dm-edit');
+  const delBtn=document.getElementById('dm-del');
+  editBtn.style.display=isHistory?'none':'inline-flex';
+  delBtn.style.display=isHistory?'none':'inline-flex';
+  document.getElementById('detail-modal').classList.add('open');
+}
+function deleteFromDetail(){
+  if(!confirm('确定删除？'))return;
+  posts=posts.filter(p=>p.id!==detailId);
+  renderDrafts();
+  document.getElementById('detail-modal').classList.remove('open');
+  toast('已删除');
+}
+function editFromDetail(){document.getElementById('detail-modal').classList.remove('open');openModal(detailId);}
+
+/* ---- TELEGRAM ---- */
+function openTgSetup(){
+  document.getElementById('tg-token').value=tgToken;
+  document.getElementById('tg-chatid').value=tgChatId;
+  document.getElementById('tg-result').textContent='';
+  document.getElementById('tg-modal').classList.add('open');
+}
+async function testTg(){
+  const tk=document.getElementById('tg-token').value.trim();
+  const ci=document.getElementById('tg-chatid').value.trim();
+  const res=document.getElementById('tg-result');
+  if(!tk||!ci){res.style.color='var(--danger)';res.textContent='请填写 Token 和 Chat ID';return;}
+  res.style.color='var(--text3)';res.textContent='发送中…';
+  const ok=await sendTg('✅ 内容排期工具连接成功！将在帖子发布前 30 分钟提醒你。',tk,ci);
+  if(ok){res.style.color='var(--success)';res.textContent='✓ 发送成功！';}
+  else{res.style.color='var(--danger)';res.textContent='✗ 发送失败，请检查 Token 和 Chat ID。';}
+}
+function saveTg(){
+  tgToken=document.getElementById('tg-token').value.trim();
+  tgChatId=document.getElementById('tg-chatid').value.trim();
+  document.getElementById('tg-modal').classList.remove('open');
+  toast('Telegram 设置已保存 ✓');
+  updateTgWarn();
+}
+async function sendTg(text,tk,ci){
+  try{
+    const r=await fetch(`https://api.telegram.org/bot${tk||tgToken}/sendMessage`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({chat_id:ci||tgChatId,text})});
+    return r.ok;
+  }catch{return false;}
+}
+function scheduleReminder(timeStr,title){
+  const delay=new Date(timeStr).getTime()-30*60*1000-Date.now();
+  if(delay>0) setTimeout(()=>sendTg(`📢 发布提醒\n\n「${title}」将在 30 分钟后发布！`),delay);
+}
+
+/* ---- INIT ---- */
 renderDrafts();
-currentMonth = new Date();
+curMonth=new Date();
 </script>
 </body>
 </html>
